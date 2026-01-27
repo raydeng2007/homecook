@@ -1,3 +1,75 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  /* Default text color for dark theme */
+  * {
+    color: theme('colors.text.high');
+  }
+}
+
+/* Reusable component classes */
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary text-on-primary px-4 py-3 rounded-xl font-semibold;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-on-secondary px-4 py-3 rounded-xl font-semibold;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary text-primary px-4 py-3 rounded-xl font-semibold;
+  }
+
+  .btn-error {
+    @apply bg-error text-on-error px-4 py-3 rounded-xl font-semibold;
+  }
+
+  /* Cards with elevation (higher = lighter surface) */
+  .card {
+    @apply bg-surface-1 p-4 rounded-2xl;
+  }
+
+  .card-elevated {
+    @apply bg-surface-3 p-4 rounded-2xl;
+  }
+
+  /* Input */
+  .input {
+    @apply bg-surface-1 border border-surface-4 px-4 py-3 rounded-xl text-base text-text-high;
+  }
+
+  /* Typography */
+  .heading-1 {
+    @apply text-4xl font-bold text-text-high;
+  }
+
+  .heading-2 {
+    @apply text-2xl font-bold text-text-high;
+  }
+
+  .body-text {
+    @apply text-base text-text-high;
+  }
+
+  .body-text-medium {
+    @apply text-base text-text-medium;
+  }
+
+  .muted-text {
+    @apply text-sm text-text-medium;
+  }
+
+  .disabled-text {
+    @apply text-sm text-text-disabled;
+  }
+
+  /* Screen container */
+  .screen {
+    @apply flex-1 bg-background;
+  }
+}
