@@ -8,57 +8,66 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // Material Design Dark Theme Colors
+      // Material Design Theme Colors — CSS variable–backed for dark/light toggle
       colors: {
-        // Primary - Purple (BB86FC)
+        // Primary - Purple (stays constant across themes)
         primary: {
           DEFAULT: '#BB86FC',
           variant: '#3700B3',
         },
-        // Secondary - Teal (03DAC6)
+        // Secondary - Teal
         secondary: {
           DEFAULT: '#03DAC6',
           variant: '#018786',
         },
-        // Background colors
-        background: '#121212',
-        // Surface colors (elevated surfaces get lighter)
+        // Theme-aware colors (via NativeWind vars())
+        background: 'var(--color-bg)',
         surface: {
-          DEFAULT: '#121212',
-          '1': '#1E1E1E',  // 5% white overlay
-          '2': '#232323',  // 7% white overlay
-          '3': '#252525',  // 8% white overlay
-          '4': '#272727',  // 9% white overlay
-          '5': '#2C2C2C',  // 11% white overlay
+          DEFAULT: 'var(--color-bg)',
+          '1': 'var(--color-surface-1)',
+          '2': 'var(--color-surface-2)',
+          '3': 'var(--color-surface-3)',
+          '4': 'var(--color-surface-4)',
+          '5': 'var(--color-surface-5)',
         },
         // Error state
         error: {
           DEFAULT: '#CF6679',
           variant: '#B00020',
         },
-        // On colors (text/icons on top of surfaces)
+        // On colors
         on: {
-          primary: '#000000',
+          primary: 'var(--color-on-primary)',
           secondary: '#000000',
           background: '#FFFFFF',
           surface: '#FFFFFF',
           error: '#000000',
         },
-        // Text colors
+        // Theme-aware text colors
         text: {
-          DEFAULT: '#FFFFFF',
-          high: 'rgba(255, 255, 255, 0.87)',    // High emphasis
-          medium: 'rgba(255, 255, 255, 0.60)',  // Medium emphasis
-          disabled: 'rgba(255, 255, 255, 0.38)', // Disabled
+          DEFAULT: 'var(--color-text-high)',
+          high: 'var(--color-text-high)',
+          medium: 'var(--color-text-medium)',
+          disabled: 'var(--color-text-disabled)',
+        },
+        // Warm palette for gradient recipe cards
+        warm: {
+          '1': '#FF8A65',
+          '2': '#FFB74D',
+          '3': '#FFD54F',
+          '4': '#FFAB91',
+          '5': '#FF7043',
+        },
+        // Elegant border colors
+        border: {
+          subtle: 'var(--color-border-subtle)',
+          card: 'var(--color-border-card)',
+          focus: 'var(--color-border-focus)',
         },
       },
-      // Custom font families (after loading fonts with expo-font)
       fontFamily: {
         sans: ['System'],
-        // heading: ['Poppins-Bold'],
-        // body: ['Inter-Regular'],
       },
-      // Custom font sizes
       fontSize: {
         'xs': ['12px', { lineHeight: '16px' }],
         'sm': ['14px', { lineHeight: '20px' }],
@@ -69,12 +78,10 @@ module.exports = {
         '3xl': ['30px', { lineHeight: '36px' }],
         '4xl': ['36px', { lineHeight: '40px' }],
       },
-      // Custom spacing
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
       },
-      // Custom border radius
       borderRadius: {
         'xl': '12px',
         '2xl': '16px',

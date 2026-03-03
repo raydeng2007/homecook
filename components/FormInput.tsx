@@ -1,4 +1,5 @@
 import { View, Text, TextInput, TextInputProps } from 'react-native';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 interface FormInputProps extends Omit<TextInputProps, 'className'> {
   label: string;
@@ -11,6 +12,7 @@ export function FormInput({
   secureTextEntry,
   ...props
 }: FormInputProps) {
+  const { textDisabled } = useThemeColors();
   return (
     <View className="mb-4">
       <Text className="text-sm text-text-medium mb-2">{label}</Text>
@@ -18,7 +20,7 @@ export function FormInput({
         className={`bg-surface-1 border px-4 py-3 rounded-xl text-base text-text-high ${
           error ? 'border-error' : 'border-surface-4'
         }`}
-        placeholderTextColor="rgba(255, 255, 255, 0.38)"
+        placeholderTextColor={textDisabled}
         secureTextEntry={secureTextEntry}
         autoCapitalize={secureTextEntry ? 'none' : props.autoCapitalize}
         autoCorrect={secureTextEntry ? false : props.autoCorrect}

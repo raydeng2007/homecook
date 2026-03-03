@@ -29,18 +29,18 @@
     @apply bg-error text-on-error px-4 py-3 rounded-xl font-semibold;
   }
 
-  /* Cards with elevation (higher = lighter surface) */
+  /* Cards with elevation + elegant subtle border */
   .card {
-    @apply bg-surface-1 p-4 rounded-2xl;
+    @apply bg-surface-1 p-4 rounded-2xl border border-border-card;
   }
 
   .card-elevated {
-    @apply bg-surface-3 p-4 rounded-2xl;
+    @apply bg-surface-3 p-4 rounded-2xl border border-border-card;
   }
 
   /* Input */
   .input {
-    @apply bg-surface-1 border border-surface-4 px-4 py-3 rounded-xl text-base text-text-high;
+    @apply bg-surface-1 border border-border-subtle px-4 py-3 rounded-xl text-base text-text-high;
   }
 
   /* Typography */
@@ -71,5 +71,24 @@
   /* Screen container */
   .screen {
     @apply flex-1 bg-background;
+  }
+
+  /* Pill chip for category filters */
+  .pill-chip {
+    @apply px-4 py-2 rounded-full bg-surface-2;
+  }
+
+  .pill-chip-active {
+    @apply px-4 py-2 rounded-full bg-primary;
+  }
+
+  /* Search bar */
+  .search-bar {
+    @apply bg-surface-2 rounded-2xl px-4 py-3 flex-row items-center;
+  }
+
+  /* Section heading */
+  .section-heading {
+    @apply text-xl font-bold text-text-high mb-3;
   }
 }

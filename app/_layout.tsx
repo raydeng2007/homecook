@@ -1,7 +1,18 @@
 import { Slot, useRouter, useSegments } from 'expo-router';
+import { View } from 'react-native';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import '../global.css';
+
+function ThemeRoot({ children }: { children: React.ReactNode }) {
+  const { themeVars } = useTheme();
+  return (
+    <View style={[{ flex: 1 }, themeVars]}>
+      {children}
+    </View>
+  );
+}
 
 function RootLayoutNav() {
   const { session, isLoading } = useAuth();
@@ -25,8 +36,12 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ThemeRoot>
+          <RootLayoutNav />
+        </ThemeRoot>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

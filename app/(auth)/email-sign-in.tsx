@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { FormInput } from '@/components/FormInput';
 import { LoadingButton } from '@/components/LoadingButton';
 import { signInWithEmail } from '@/lib/auth';
-import { validateEmail, validatePassword } from '@/lib/validation';
+import { validateEmail } from '@/lib/validation';
 
 export default function EmailSignInScreen() {
   const router = useRouter();
+  const { statusBarStyle } = useThemeColors();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,9 @@ export default function EmailSignInScreen() {
 
   const validateForm = (): boolean => {
     const emailErr = validateEmail(email);
-    const passwordErr = validatePassword(password);
+    // For sign-in, only check password is present (not length — user may have
+    // a short password set via Supabase dashboard or an older policy)
+    const passwordErr = password.trim() ? null : 'Password is required';
 
     setEmailError(emailErr);
     setPasswordError(passwordErr);
@@ -61,7 +65,7 @@ export default function EmailSignInScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="screen"
     >
-      <StatusBar style="light" />
+      <StatusBar style={statusBarStyle} />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -111,7 +115,7 @@ export default function EmailSignInScreen() {
                 setPasswordError(null);
                 setError(null);
               }}
-              onBlur={() => setPasswordError(validatePassword(password))}
+              onBlur={() => setPasswordError(password.trim() ? null : 'Password is required')}
               error={passwordError}
               placeholder="Enter your password"
               secureTextEntry

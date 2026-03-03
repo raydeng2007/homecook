@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { FormInput } from '@/components/FormInput';
 import { LoadingButton } from '@/components/LoadingButton';
 import { signUpWithEmail } from '@/lib/auth';
@@ -14,6 +15,7 @@ import {
 
 export default function EmailSignUpScreen() {
   const router = useRouter();
+  const { statusBarStyle } = useThemeColors();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -53,20 +55,19 @@ export default function EmailSignUpScreen() {
 
     try {
       const result = await signUpWithEmail(email, password, fullName || undefined);
-      console.log('[SignUp] Result:', JSON.stringify(result));
 
       if (!result.success && result.error) {
         setError(result.error);
-      } else if (result.success) {
-        // Navigate to confirmation screen on successful sign-up
-        console.log('[SignUp] Navigating to confirmation screen');
+      } else if (result.needsEmailConfirmation) {
+        // Email confirmation required — no session yet, show confirmation screen
         router.replace({
           pathname: '/(auth)/email-confirmation',
           params: { email: email.trim().toLowerCase() },
         });
       }
+      // If no confirmation needed, Supabase created a session immediately.
+      // AuthContext detects it and root layout redirects to /(app) automatically.
     } catch (err) {
-      console.error('[SignUp] Error:', err);
       setError('An unexpected error occurred');
     } finally {
       setIsLoading(false);
@@ -81,7 +82,7 @@ export default function EmailSignUpScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="screen"
     >
-      <StatusBar style="light" />
+      <StatusBar style={statusBarStyle} />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"

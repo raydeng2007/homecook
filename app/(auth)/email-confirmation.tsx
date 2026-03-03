@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { LoadingButton } from '@/components/LoadingButton';
 import { resendConfirmationEmail } from '@/lib/auth';
 
 export default function EmailConfirmationScreen() {
   const router = useRouter();
+  const { statusBarStyle } = useThemeColors();
   const { email } = useLocalSearchParams<{ email: string }>();
 
   const [isResending, setIsResending] = useState(false);
@@ -47,7 +49,7 @@ export default function EmailConfirmationScreen() {
 
   return (
     <View className="screen px-6">
-      <StatusBar style="light" />
+      <StatusBar style={statusBarStyle} />
 
       <View className="flex-1 justify-center items-center">
         {/* Email Icon Placeholder */}

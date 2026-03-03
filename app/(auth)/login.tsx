@@ -1,11 +1,13 @@
 import { View, Text, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { SocialLoginButton } from '@/components/SocialLoginButton';
 import { signInWithGoogle, signInWithFacebook } from '@/lib/auth';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { statusBarStyle } = useThemeColors();
 
   const handleGoogleLogin = async () => {
     try {
@@ -31,7 +33,7 @@ export default function LoginScreen() {
 
   return (
     <View className="screen items-center justify-center px-6">
-      <StatusBar style="light" />
+      <StatusBar style={statusBarStyle} />
 
       {/* Title */}
       <View className="items-center mb-8">
