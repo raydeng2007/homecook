@@ -28,7 +28,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. `lib/validation.ts`, `lib/ingredient-normalize.ts`, `lib/portion-scaling.ts`, and `lib/date-utils.ts` each have tests that pass edge cases
   3. `package-lock.json` exists and is committed, so `npm ci` succeeds in a fresh environment
   4. Test files live in `__tests__/` (not `app/`), and the Jest config matches the jest-expo preset exactly
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Install jest + jest-expo, create jest.config.js, add test scripts
+- [ ] 01-02-PLAN.md — Extract date-utils to shared module, write validation + date-utils tests
+- [ ] 01-03-PLAN.md — Write ingredient-normalize, portion-scaling, ingredient-categories tests; commit lockfile
 
 ### Phase 2: Security and Stability
 **Goal**: The app cannot expose other households' data and will not show a blank/frozen screen when errors occur
@@ -73,7 +78,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Testing Foundation | 0/? | Not started | - |
+| 1. Testing Foundation | 0/3 | Not started | - |
 | 2. Security and Stability | 0/? | Not started | - |
 | 3. Store Compliance | 0/? | Not started | - |
 | 4. Submission | 0/? | Not started | - |
