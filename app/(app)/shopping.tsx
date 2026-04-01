@@ -15,33 +15,9 @@ import {
 } from '@/lib/ingredient-categories';
 import { normalizeIngredient, pickDisplayName } from '@/lib/ingredient-normalize';
 import type { MealPlanWithFullRecipe, Ingredient, NormalizedIngredient, IngredientCategory } from '@/types/database';
+import { formatDateKey, getWeekRange, formatWeekLabel } from '@/lib/date-utils';
 
 // ── Helpers ────────────────────────────────────────────────────────────
-
-function getWeekRange(baseDate: Date): { start: Date; end: Date } {
-  const monday = new Date(baseDate);
-  const day = monday.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  monday.setDate(monday.getDate() + diff);
-  monday.setHours(0, 0, 0, 0);
-
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-
-  return { start: monday, end: sunday };
-}
-
-function formatDateKey(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function formatWeekLabel(start: Date, end: Date): string {
-  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  return `${start.toLocaleDateString('en-US', opts)} – ${end.toLocaleDateString('en-US', opts)}`;
-}
 
 type AggregatedItem = {
   key: string; // normalized name + unit

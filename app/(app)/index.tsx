@@ -11,15 +11,9 @@ import AddMealModal from '@/components/AddMealModal';
 import { getMealPlansForDate, removeMealPlan } from '@/lib/meal-plans';
 import { MEAL_TYPE_LABELS, MEAL_TYPE_COLORS } from '@/types/database';
 import type { MealPlanWithRecipe } from '@/types/database';
+import { formatDateKey } from '@/lib/date-utils';
 
 type CalendarMode = 'month' | 'week';
-
-function formatDateKey(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
 
 function formatDateLabel(date: Date): string {
   return date.toLocaleDateString('en-US', {

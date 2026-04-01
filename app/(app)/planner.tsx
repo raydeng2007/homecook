@@ -11,13 +11,7 @@ import AddMealModal from '@/components/AddMealModal';
 import { getMealPlansForMonth, removeMealPlan } from '@/lib/meal-plans';
 import { MEAL_TYPE_COLORS } from '@/types/database';
 import type { MealPlanWithRecipe } from '@/types/database';
-
-function formatDateKey(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
+import { formatDateKey } from '@/lib/date-utils';
 
 export default function PlannerScreen() {
   const { home } = useHome();

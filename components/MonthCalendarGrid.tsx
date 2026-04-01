@@ -2,6 +2,7 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HexagonShape from '@/components/HexagonShape';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { formatDateKey } from '@/lib/date-utils';
 
 type MarkedDate = {
   dots: { color: string }[];
@@ -14,13 +15,6 @@ type MonthCalendarGridProps = {
 };
 
 const DAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-
-function formatDateKey(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
 
 function isSameDay(a: Date, b: Date): boolean {
   return (
