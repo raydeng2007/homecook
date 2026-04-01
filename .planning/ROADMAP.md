@@ -31,8 +31,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Install jest + jest-expo, create jest.config.js, add test scripts
-- [ ] 01-02-PLAN.md — Extract date-utils to shared module, write validation + date-utils tests
+- [x] 01-01-PLAN.md — Install jest + jest-expo, create jest.config.js, add test scripts
+- [x] 01-02-PLAN.md — Extract date-utils to shared module, write validation + date-utils tests
 - [ ] 01-03-PLAN.md — Write ingredient-normalize, portion-scaling, ingredient-categories tests; commit lockfile
 
 ### Phase 2: Security and Stability

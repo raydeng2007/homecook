@@ -10,10 +10,10 @@ Requirements for app store submission. Each maps to roadmap phases.
 ### Testing
 
 - [x] **TEST-01**: Jest + jest-expo test framework installed and configured with jest.config.js
-- [ ] **TEST-02**: Unit tests for validation functions (lib/validation.ts) with edge cases
+- [x] **TEST-02**: Unit tests for validation functions (lib/validation.ts) with edge cases
 - [ ] **TEST-03**: Unit tests for ingredient normalization (lib/ingredient-normalize.ts)
 - [ ] **TEST-04**: Unit tests for portion scaling (lib/portion-scaling.ts)
-- [ ] **TEST-05**: Unit tests for date utility functions (extracted to lib/date-utils.ts)
+- [x] **TEST-05**: Unit tests for date utility functions (extracted to lib/date-utils.ts)
 - [x] **TEST-06**: package-lock.json generated and committed (CI blocker)
 
 ### Security
@@ -97,10 +97,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | TEST-01 | Phase 1 | Complete |
-| TEST-02 | Phase 1 | Pending |
+| TEST-02 | Phase 1 | Complete |
 | TEST-03 | Phase 1 | Pending |
 | TEST-04 | Phase 1 | Pending |
-| TEST-05 | Phase 1 | Pending |
+| TEST-05 | Phase 1 | Complete |
 | TEST-06 | Phase 1 | Complete |
 | SEC-01 | Phase 3 | Pending |
 | SEC-02 | Phase 2 | Pending |
