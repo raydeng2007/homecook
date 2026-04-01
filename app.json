@@ -6,30 +6,66 @@
     "newArchEnabled": true,
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#09090b"
+      "backgroundColor": "#121212"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.homecook.app"
+      "bundleIdentifier": "io.rayray.homecook",
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CFBundleDisplayName": "HomeCook",
+        "NSCameraUsageDescription": "HomeCook needs camera access to take photos of your recipes.",
+        "NSPhotoLibraryUsageDescription": "HomeCook needs photo library access to add images to your recipes."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#09090b"
+        "backgroundColor": "#121212"
       },
-      "package": "com.homecook.app"
+      "package": "io.rayray.homecook",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#121212",
+          "image": "./assets/splash.png",
+          "imageWidth": 200
+        }
+      ]
     ],
-    "scheme": "homecook"
+    "scheme": "homecook",
+    "extra": {
+      "eas": {
+        "projectId": "af36abd1-c923-4dcd-ae38-9abb55da9644"
+      },
+      "router": {
+        "origin": false
+      }
+    },
+    "owner": "raydeng2007",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": ""
+    }
   }
 }

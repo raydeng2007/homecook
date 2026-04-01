@@ -72,7 +72,7 @@ export default function MonthCalendarGrid({
   onSelectDate,
   markedDates,
 }: MonthCalendarGridProps) {
-  const { textHigh } = useThemeColors();
+  const { textHigh, primary } = useThemeColors();
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth();
   const weeks = getMonthGrid(year, month);
@@ -149,8 +149,8 @@ export default function MonthCalendarGrid({
                 {selected || today ? (
                   <HexagonShape
                     size={30}
-                    backgroundColor={selected ? '#BB86FC' : 'transparent'}
-                    borderColor={today && !selected ? 'rgba(187,134,252,0.5)' : undefined}
+                    backgroundColor={selected ? primary : 'transparent'}
+                    borderColor={today && !selected ? 'rgba(217,185,145,0.5)' : undefined}
                     borderWidth={today && !selected ? 1.5 : 0}
                   >
                     <Text

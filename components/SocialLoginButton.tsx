@@ -1,10 +1,12 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View, ActivityIndicator } from 'react-native';
 
 type SocialProvider = 'google' | 'facebook' | 'email';
 
 interface SocialLoginButtonProps {
   provider: SocialProvider;
   onPress: () => void;
+  disabled?: boolean;
+  testID?: string;
 }
 
 const providerConfig: Record<SocialProvider, { label: string; icon: string }> = {
@@ -13,13 +15,15 @@ const providerConfig: Record<SocialProvider, { label: string; icon: string }> = 
   email: { label: 'Continue with Email', icon: '@' },
 };
 
-export function SocialLoginButton({ provider, onPress }: SocialLoginButtonProps) {
+export function SocialLoginButton({ provider, onPress, disabled, testID }: SocialLoginButtonProps) {
   const { label, icon } = providerConfig[provider];
 
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center bg-surface-1 active:bg-surface-3 py-4 px-6 rounded-xl"
+      disabled={disabled}
+      testID={testID}
+      className={`flex-row items-center bg-surface-1 active:bg-surface-3 py-4 px-6 rounded-xl ${disabled ? 'opacity-50' : ''}`}
     >
       <View className="w-8 h-8 items-center justify-center mr-4">
         <Text className="text-xl font-bold text-primary">{icon}</Text>

@@ -7,6 +7,7 @@ type TabConfig = {
   icon: keyof typeof Ionicons.glyphMap;
   iconOutline: keyof typeof Ionicons.glyphMap;
   label: string;
+  testID: string;
 };
 
 const TAB_CONFIG: Record<string, TabConfig> = {
@@ -14,21 +15,25 @@ const TAB_CONFIG: Record<string, TabConfig> = {
     icon: 'home',
     iconOutline: 'home-outline',
     label: 'Home',
+    testID: 'tab-home',
   },
   'recipes/index': {
     icon: 'book',
     iconOutline: 'book-outline',
     label: 'Cookbook',
+    testID: 'tab-cookbook',
   },
   shopping: {
     icon: 'cart',
     iconOutline: 'cart-outline',
     label: 'Shopping',
+    testID: 'tab-shopping',
   },
   household: {
     icon: 'people',
     iconOutline: 'people-outline',
     label: 'Household',
+    testID: 'tab-household',
   },
 };
 
@@ -74,6 +79,7 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
           <View key={route.key} className="flex-1 items-center">
             <Pressable
               onPress={onPress}
+              testID={config.testID}
               className="items-center justify-center py-1.5 px-3 min-w-[64px]"
               accessibilityRole="tab"
               accessibilityState={{ selected: isFocused }}

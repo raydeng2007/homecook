@@ -11,16 +11,16 @@ export type RecipeVisual = {
 };
 
 const GRADIENT_PALETTES: [string, string][] = [
-  ['#FF8A65', '#E64A19'], // warm orange
-  ['#CE93D8', '#7B1FA2'], // deep purple
-  ['#80CBC4', '#00695C'], // teal
-  ['#FFD54F', '#F9A825'], // amber
-  ['#A5D6A7', '#2E7D32'], // green
-  ['#EF9A9A', '#C62828'], // coral red
-  ['#90CAF9', '#1565C0'], // blue
-  ['#FFAB91', '#BF360C'], // deep orange
-  ['#B39DDB', '#4527A0'], // indigo
-  ['#FFF176', '#F57F17'], // yellow
+  ['#D9B991', '#B89870'], // champagne
+  ['#C17F4E', '#8B5E3C'], // copper
+  ['#E8C088', '#D4A054'], // light gold
+  ['#8FB88E', '#5C8A5C'], // sage
+  ['#E07A5F', '#C24D35'], // terracotta
+  ['#A67C52', '#6B4E30'], // brown
+  ['#8B3A3A', '#5C1E1E'], // dusty bordeaux
+  ['#C9A882', '#8B7355'], // tan
+  ['#E8B87D', '#C17F4E'], // light copper
+  ['#B8A08E', '#7D6B5D'], // warm gray
 ];
 
 const FOOD_EMOJIS = [
@@ -57,14 +57,14 @@ export function getRecipeVisual(recipeId: string): RecipeVisual {
  */
 export function getWarmColor(index: number): string {
   const warmColors = [
-    '#FF8A65', // orange
-    '#FFB74D', // light orange
-    '#FFD54F', // amber
-    '#A5D6A7', // green
-    '#80CBC4', // teal
-    '#CE93D8', // purple
-    '#EF9A9A', // pink
-    '#90CAF9', // blue
+    '#D9B991', // champagne
+    '#C17F4E', // copper
+    '#E8C088', // light gold
+    '#8FB88E', // sage
+    '#E07A5F', // terracotta
+    '#A67C52', // brown
+    '#C9A882', // tan
+    '#B8A08E', // warm gray
   ];
   return warmColors[index % warmColors.length];
 }

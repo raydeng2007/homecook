@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'expo-router';
@@ -43,14 +43,18 @@ export default function HomeScreen() {
   const dateKey = formatDateKey(selectedDate);
   const dateLabel = formatDateLabel(selectedDate);
 
+  const [planError, setPlanError] = useState<string | null>(null);
+
   const loadMealPlans = useCallback(async () => {
     if (!home?.id) return;
     try {
       setIsLoadingPlans(true);
+      setPlanError(null);
       const data = await getMealPlansForDate(home.id, dateKey);
       setMealPlans(data);
     } catch (err) {
-      console.error('[Home] Failed to load meal plans:', err);
+      const message = err instanceof Error ? err.message : 'Failed to load meal plans';
+      setPlanError(message);
     } finally {
       setIsLoadingPlans(false);
     }
@@ -69,7 +73,7 @@ export default function HomeScreen() {
       await removeMealPlan(id);
       loadMealPlans();
     } catch (err) {
-      console.error('[Home] Failed to remove meal:', err);
+      Alert.alert('Error', 'Failed to remove meal. Please try again.');
     }
   };
 
@@ -105,13 +109,14 @@ export default function HomeScreen() {
 
           {/* Toggle row: Today + View toggle */}
           <View className="flex-row items-center justify-between mt-2.5">
-            <Pressable onPress={() => setSelectedDate(new Date())}>
+            <Pressable onPress={() => setSelectedDate(new Date())} testID="home-today-btn">
               <Text className="text-xs text-primary font-medium">Today</Text>
             </Pressable>
 
             <View className="flex-row bg-surface-2 rounded-lg overflow-hidden">
               <Pressable
                 onPress={() => setCalendarMode('month')}
+                testID="home-month-toggle"
                 className={`px-3 py-1.5 ${calendarMode === 'month' ? 'bg-surface-4' : ''}`}
               >
                 <Text
@@ -124,6 +129,7 @@ export default function HomeScreen() {
               </Pressable>
               <Pressable
                 onPress={() => setCalendarMode('week')}
+                testID="home-week-toggle"
                 className={`px-3 py-1.5 ${calendarMode === 'week' ? 'bg-surface-4' : ''}`}
               >
                 <Text
@@ -144,6 +150,7 @@ export default function HomeScreen() {
             <Text className="section-heading">{dateLabel}</Text>
             <Pressable
               onPress={() => setShowAddModal(true)}
+              testID="home-add-meal-btn"
               className="flex-row items-center gap-1 active:opacity-70"
             >
               <Ionicons name="add" size={16} color={primary} />
@@ -155,6 +162,14 @@ export default function HomeScreen() {
             <View className="py-6 items-center">
               <ActivityIndicator size="small" color={primary} />
             </View>
+          ) : planError ? (
+            <Pressable
+              onPress={loadMealPlans}
+              className="bg-surface-1 rounded-2xl border border-error/30 p-5 items-center active:bg-surface-2"
+            >
+              <Text className="text-error text-sm">Failed to load meals</Text>
+              <Text className="text-text-disabled text-xs mt-1">Tap to retry</Text>
+            </Pressable>
           ) : mealPlans.length === 0 ? (
             <Pressable
               onPress={() => setShowAddModal(true)}
@@ -170,7 +185,7 @@ export default function HomeScreen() {
           ) : (
             <View className="bg-surface-1 rounded-2xl border border-border-card overflow-hidden">
               {mealPlans.map((plan, idx) => {
-                const mealColor = MEAL_TYPE_COLORS[plan.meal_type] ?? '#BB86FC';
+                const mealColor = MEAL_TYPE_COLORS[plan.meal_type] ?? '#D9B991';
                 const mealLabel = MEAL_TYPE_LABELS[plan.meal_type] ?? plan.meal_type;
                 return (
                   <Pressable

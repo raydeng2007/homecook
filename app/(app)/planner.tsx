@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useHome } from '@/contexts/HomeContext';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import WeekCalendarStrip from '@/components/WeekCalendarStrip';
 import MealPlanCard from '@/components/MealPlanCard';
 import AddMealModal from '@/components/AddMealModal';
@@ -21,6 +22,7 @@ function formatDateKey(date: Date): string {
 export default function PlannerScreen() {
   const { home } = useHome();
   const router = useRouter();
+  const { statusBarStyle, primary, textHigh, textDisabled } = useThemeColors();
   const today = useMemo(() => new Date(), []);
 
   const [selectedDate, setSelectedDate] = useState(today);
@@ -37,7 +39,7 @@ export default function PlannerScreen() {
       );
       setMonthMealPlans(plans);
     } catch (err) {
-      console.error('[Planner] Failed to load plans:', err);
+      Alert.alert('Error', 'Failed to load meal plans. Please try again.');
     }
   }, [home?.id, selectedDate]);
 
@@ -52,7 +54,7 @@ export default function PlannerScreen() {
       if (!marks[plan.date]) {
         marks[plan.date] = { dots: [] };
       }
-      const color = MEAL_TYPE_COLORS[plan.meal_type] ?? '#BB86FC';
+      const color = MEAL_TYPE_COLORS[plan.meal_type] ?? primary;
       if (!marks[plan.date].dots.some((d) => d.color === color)) {
         marks[plan.date].dots.push({ color });
       }
@@ -78,7 +80,7 @@ export default function PlannerScreen() {
             await removeMealPlan(id);
             loadPlans();
           } catch (err) {
-            console.error('[Planner] Failed to remove:', err);
+            Alert.alert('Error', 'Failed to remove meal. Please try again.');
           }
         },
       },
@@ -95,7 +97,7 @@ export default function PlannerScreen() {
 
   return (
     <View className="screen">
-      <StatusBar style="light" />
+      <StatusBar style={statusBarStyle} />
 
       {/* Header */}
       <View className="px-5 pt-14 pb-4 bg-surface-1 flex-row items-center">
@@ -103,7 +105,7 @@ export default function PlannerScreen() {
           onPress={() => router.back()}
           className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3 mr-2"
         >
-          <Ionicons name="arrow-back" size={22} color="rgba(255,255,255,0.87)" />
+          <Ionicons name="arrow-back" size={22} color={textHigh} />
         </Pressable>
         <Text className="text-xl font-bold text-text-high flex-1">Meal Planner</Text>
       </View>
@@ -123,14 +125,14 @@ export default function PlannerScreen() {
           onPress={goToToday}
           className="flex-row items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-2 active:bg-surface-3"
         >
-          <Ionicons name="calendar-outline" size={14} color="rgba(255,255,255,0.87)" />
+          <Ionicons name="calendar-outline" size={14} color={textHigh} />
           <Text className="text-sm text-text-high">Today</Text>
         </Pressable>
         <Pressable
           onPress={() => setShowAddModal(true)}
           className="flex-row items-center gap-1.5 px-4 py-2.5 rounded-full border border-primary active:bg-surface-3"
         >
-          <Ionicons name="add" size={16} color="#BB86FC" />
+          <Ionicons name="add" size={16} color={primary} />
           <Text className="text-sm text-primary font-medium">Add recipe</Text>
         </Pressable>
       </View>
@@ -150,7 +152,7 @@ export default function PlannerScreen() {
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
         ListEmptyComponent={
           <View className="card items-center py-8">
-            <Ionicons name="restaurant-outline" size={40} color="rgba(255,255,255,0.38)" />
+            <Ionicons name="restaurant-outline" size={40} color={textDisabled} />
             <Text className="text-text-medium mt-3">No meals planned</Text>
             <Text className="text-xs text-text-disabled mt-1">
               Tap + Add recipe to plan a meal

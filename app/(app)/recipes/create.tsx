@@ -29,7 +29,6 @@ export default function CreateRecipeScreen() {
       });
       router.back();
     } catch (err) {
-      console.error('[CreateRecipe] Error:', err);
       Alert.alert('Error', 'Failed to create recipe. Please try again.');
     } finally {
       setIsLoading(false);

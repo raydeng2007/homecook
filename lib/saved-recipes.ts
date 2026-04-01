@@ -11,7 +11,6 @@ export async function getSavedRecipeIds(userId: string): Promise<Set<string>> {
 
   // Gracefully return empty set if table doesn't exist yet
   if (error) {
-    console.warn('[SavedRecipes] Query failed (table may not exist yet):', error.message);
     return new Set();
   }
   return new Set((data ?? []).map((r) => r.recipe_id));

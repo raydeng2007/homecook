@@ -25,6 +25,7 @@ export default function MealTypeTabBar({
           <Pressable
             key={type}
             onPress={() => onSelect(type)}
+            testID={`meal-type-${type}`}
             className="flex-1 items-center py-3"
           >
             <Text

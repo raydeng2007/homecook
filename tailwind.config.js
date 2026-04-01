@@ -8,19 +8,23 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // Material Design Theme Colors — CSS variable–backed for dark/light toggle
+      // ──────────────────────────────────────────────────────
+      // Bordeaux & Champagne palette — warm artisanal cookbook
+      // To change the palette, update these values + ThemeContext.tsx + useThemeColors.ts
+      // ──────────────────────────────────────────────────────
       colors: {
-        // Primary - Purple (stays constant across themes)
+        // Primary accent — champagne gold (constant across themes for opacity support)
+        // To swap: change these hex values
         primary: {
-          DEFAULT: '#BB86FC',
-          variant: '#3700B3',
+          DEFAULT: '#D9B991',
+          variant: '#B89870',
         },
-        // Secondary - Teal
+        // Secondary — dusty bordeaux
         secondary: {
-          DEFAULT: '#03DAC6',
-          variant: '#018786',
+          DEFAULT: '#8B3A3A',
+          variant: '#6B2424',
         },
-        // Theme-aware colors (via NativeWind vars())
+        // Theme-aware surfaces (via NativeWind vars())
         background: 'var(--color-bg)',
         surface: {
           DEFAULT: 'var(--color-bg)',
@@ -30,18 +34,18 @@ module.exports = {
           '4': 'var(--color-surface-4)',
           '5': 'var(--color-surface-5)',
         },
-        // Error state
+        // Error — warm terracotta
         error: {
-          DEFAULT: '#CF6679',
-          variant: '#B00020',
+          DEFAULT: '#E07A5F',
+          variant: '#C24D35',
         },
-        // On colors
+        // On colors (text on colored backgrounds — theme-aware via CSS var)
         on: {
           primary: 'var(--color-on-primary)',
-          secondary: '#000000',
+          secondary: '#FAF3EB',
           background: '#FFFFFF',
           surface: '#FFFFFF',
-          error: '#000000',
+          error: '#FAF3EB',
         },
         // Theme-aware text colors
         text: {
@@ -52,11 +56,11 @@ module.exports = {
         },
         // Warm palette for gradient recipe cards
         warm: {
-          '1': '#FF8A65',
-          '2': '#FFB74D',
-          '3': '#FFD54F',
-          '4': '#FFAB91',
-          '5': '#FF7043',
+          '1': '#D9B991',
+          '2': '#C9A882',
+          '3': '#E8C088',
+          '4': '#A67C52',
+          '5': '#8B5E3C',
         },
         // Elegant border colors
         border: {

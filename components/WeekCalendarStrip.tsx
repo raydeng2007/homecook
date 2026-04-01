@@ -54,7 +54,7 @@ export default function WeekCalendarStrip({
   markedDates,
   showNavigation = true,
 }: WeekCalendarStripProps) {
-  const { textHigh } = useThemeColors();
+  const { textHigh, primary } = useThemeColors();
   const weekDays = getWeekDays(selectedDate);
 
   const goToPrevWeek = () => {
@@ -128,8 +128,8 @@ export default function WeekCalendarStrip({
               {selected || today ? (
                 <HexagonShape
                   size={40}
-                  backgroundColor={selected ? '#BB86FC' : 'transparent'}
-                  borderColor={today && !selected ? 'rgba(187,134,252,0.5)' : undefined}
+                  backgroundColor={selected ? primary : 'transparent'}
+                  borderColor={today && !selected ? 'rgba(217,185,145,0.5)' : undefined}
                   borderWidth={today && !selected ? 2 : 0}
                 >
                   <Text

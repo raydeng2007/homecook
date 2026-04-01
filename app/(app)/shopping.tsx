@@ -1,7 +1,7 @@
-import { View, Text, Pressable, SectionList, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, SectionList, ActivityIndicator, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useHome } from '@/contexts/HomeContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -13,7 +13,8 @@ import {
   CATEGORY_COLORS,
   CATEGORY_ORDER,
 } from '@/lib/ingredient-categories';
-import type { MealPlanWithFullRecipe, Ingredient, IngredientCategory } from '@/types/database';
+import { normalizeIngredient, pickDisplayName } from '@/lib/ingredient-normalize';
+import type { MealPlanWithFullRecipe, Ingredient, NormalizedIngredient, IngredientCategory } from '@/types/database';
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -43,12 +44,13 @@ function formatWeekLabel(start: Date, end: Date): string {
 }
 
 type AggregatedItem = {
-  key: string; // lowercase name + unit
+  key: string; // normalized name + unit
   name: string;
   quantity: number;
   unit: string;
   category: IngredientCategory;
   recipes: string[]; // recipe titles that need this ingredient
+  _rawNames: string[]; // raw variants for display name picking
 };
 
 type ShoppingSection = {
@@ -64,38 +66,60 @@ function aggregateIngredients(plans: MealPlanWithFullRecipe[]): AggregatedItem[]
 
   for (const plan of plans) {
     const { recipe } = plan;
-    if (!recipe?.ingredients) continue;
+    if (!recipe) continue;
 
-    const servingScale = plan.servings / (recipe.servings || 1);
+    const servingScale = (plan.servings ?? recipe.servings ?? 1) / (recipe.servings || 1);
 
-    for (const ing of recipe.ingredients as Ingredient[]) {
-      const normName = ing.name.trim().toLowerCase();
-      const normUnit = ing.unit.trim().toLowerCase();
+    // Prefer server-normalized ingredients when available, fall back to client-side
+    const useServerNormalized = !!recipe.normalized_ingredients?.length;
+    const ingredients = useServerNormalized
+      ? (recipe.normalized_ingredients as NormalizedIngredient[])
+      : (recipe.ingredients as Ingredient[] | null) ?? [];
+
+    for (const ing of ingredients) {
+      if (!ing.name) continue;
+
+      // Server data has name=canonical + raw_name; client data needs normalizeIngredient()
+      const rawName = ('raw_name' in ing ? (ing as NormalizedIngredient).raw_name : ing.name)?.trim() ?? '';
+      const normName = useServerNormalized ? ing.name : normalizeIngredient(rawName);
+      const normUnit = (ing.unit ?? '').trim().toLowerCase();
+      const cat: IngredientCategory = useServerNormalized && 'category' in ing
+        ? (ing.category as IngredientCategory)
+        : guessCategory(rawName);
+      if (!normName) continue;
+
       const key = `${normName}||${normUnit}`;
-
       const qty = parseFloat(ing.quantity) || 0;
       const scaledQty = qty * servingScale;
 
       const existing = map.get(key);
       if (existing) {
         existing.quantity += scaledQty;
+        existing._rawNames.push(rawName);
         if (!existing.recipes.includes(recipe.title)) {
           existing.recipes.push(recipe.title);
         }
       } else {
         map.set(key, {
           key,
-          name: ing.name.trim(),
-          quantity: scaledQty,
-          unit: ing.unit.trim(),
-          category: guessCategory(ing.name),
+          name: rawName,
+          quantity: Number.isFinite(scaledQty) ? scaledQty : 0,
+          unit: (ing.unit ?? '').trim(),
+          category: cat,
           recipes: [recipe.title],
+          _rawNames: [rawName],
         });
       }
     }
   }
 
-  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  // Pick the best display name from raw variants
+  const results = Array.from(map.values());
+  for (const item of results) {
+    item.name = pickDisplayName(item._rawNames);
+  }
+
+  return results.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function groupByCategory(items: AggregatedItem[]): ShoppingSection[] {
@@ -132,11 +156,14 @@ function formatQuantity(qty: number): string {
 
 export default function ShoppingScreen() {
   const { home } = useHome();
-  const { statusBarStyle, textHigh, textDisabled, onPrimary, primary } = useThemeColors();
+  const { statusBarStyle, textHigh, textDisabled, onPrimary, primary, error: errorColor } = useThemeColors();
   const [weekOffset, setWeekOffset] = useState(0);
   const [plans, setPlans] = useState<MealPlanWithFullRecipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
+  const lastWeekOffset = useRef(weekOffset);
 
   const { start, end } = useMemo(() => {
     const base = new Date();
@@ -146,11 +173,12 @@ export default function ShoppingScreen() {
 
   const weekLabel = formatWeekLabel(start, end);
 
-  const loadPlans = useCallback(async () => {
+  const loadPlans = useCallback(async (silent = false) => {
     if (!home?.id) return;
 
     try {
-      setIsLoading(true);
+      if (!silent) setIsLoading(true);
+      setLoadError(null);
       const data = await getMealPlansForRange(
         home.id,
         formatDateKey(start),
@@ -158,18 +186,29 @@ export default function ShoppingScreen() {
       );
       setPlans(data);
     } catch (err) {
-      console.error('[Shopping] Failed to load plans:', err);
+      const message = err instanceof Error ? err.message : 'Failed to load shopping list';
+      setLoadError(message);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }, [home?.id, start, end]);
 
+  // Only reset checked items when the week changes, not on every focus
   useFocusEffect(
     useCallback(() => {
+      if (lastWeekOffset.current !== weekOffset) {
+        setCheckedItems(new Set());
+        lastWeekOffset.current = weekOffset;
+      }
       loadPlans();
-      setCheckedItems(new Set());
-    }, [loadPlans])
+    }, [loadPlans, weekOffset])
   );
+
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    loadPlans(true);
+  }, [loadPlans]);
 
   const items = useMemo(() => aggregateIngredients(plans), [plans]);
   const sections = useMemo(() => groupByCategory(items), [items]);
@@ -202,6 +241,7 @@ export default function ShoppingScreen() {
         <View className="bg-surface-1 rounded-2xl p-3 border border-border-card flex-row items-center justify-between">
           <Pressable
             onPress={() => setWeekOffset((o) => o - 1)}
+            testID="shopping-prev-week"
             className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
             accessibilityLabel="Previous week"
           >
@@ -209,7 +249,7 @@ export default function ShoppingScreen() {
           </Pressable>
 
           <View className="items-center">
-            <Text className="text-sm text-text-high font-medium">{weekLabel}</Text>
+            <Text testID="shopping-week-label" className="text-sm text-text-high font-medium">{weekLabel}</Text>
             {weekOffset === 0 && (
               <Text className="text-xs text-secondary mt-0.5">This week</Text>
             )}
@@ -217,6 +257,7 @@ export default function ShoppingScreen() {
 
           <Pressable
             onPress={() => setWeekOffset((o) => o + 1)}
+            testID="shopping-next-week"
             className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
             accessibilityLabel="Next week"
           >
@@ -231,7 +272,7 @@ export default function ShoppingScreen() {
               {checkedCount} of {totalCount} items checked
             </Text>
             {checkedCount > 0 && (
-              <Pressable onPress={clearChecked}>
+              <Pressable onPress={clearChecked} testID="shopping-reset-btn">
                 <Text className="text-xs text-primary font-medium">Reset</Text>
               </Pressable>
             )}
@@ -243,6 +284,24 @@ export default function ShoppingScreen() {
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={primary} />
+        </View>
+      ) : loadError ? (
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="w-20 h-20 rounded-full bg-error/15 items-center justify-center mb-4">
+            <Ionicons name="alert-circle-outline" size={40} color={errorColor} />
+          </View>
+          <Text className="text-error text-lg text-center">
+            Failed to load shopping list
+          </Text>
+          <Text className="text-text-disabled text-sm mt-2 text-center max-w-[260px]">
+            {loadError}
+          </Text>
+          <Pressable
+            onPress={() => loadPlans()}
+            className="mt-4 px-4 py-2 rounded-lg bg-surface-3 active:bg-surface-5"
+          >
+            <Text className="text-primary text-sm font-medium">Try Again</Text>
+          </Pressable>
         </View>
       ) : items.length === 0 ? (
         <View className="flex-1 items-center justify-center px-6">
@@ -270,6 +329,14 @@ export default function ShoppingScreen() {
           keyExtractor={(item) => item.key}
           contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
           stickySectionHeadersEnabled={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              tintColor={primary}
+              colors={[primary]}
+            />
+          }
           ListHeaderComponent={
             <View className="flex-row items-center justify-between py-2 mb-1">
               <Text className="text-base font-bold text-text-high">

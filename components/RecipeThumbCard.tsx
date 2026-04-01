@@ -2,6 +2,7 @@ import { View, Text, Pressable } from 'react-native';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import RecipeImage from '@/components/RecipeImage';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import type { Recipe } from '@/types/database';
 
 type RecipeThumbCardProps = {
@@ -10,6 +11,7 @@ type RecipeThumbCardProps = {
 };
 
 export default function RecipeThumbCard({ recipe, onPress }: RecipeThumbCardProps) {
+  const { primary, secondary } = useThemeColors();
   return (
     <Link
       href={{ pathname: '/(app)/recipes/[id]', params: { id: recipe.id } }}
@@ -34,12 +36,12 @@ export default function RecipeThumbCard({ recipe, onPress }: RecipeThumbCardProp
         <View className="flex-row items-center gap-2">
           {recipe.calories != null && (
             <View className="flex-row items-center gap-0.5">
-              <Ionicons name="flame-outline" size={11} color="#BB86FC" />
+              <Ionicons name="flame-outline" size={11} color={primary} />
               <Text className="text-xs text-text-disabled">{recipe.calories} cal</Text>
             </View>
           )}
           <View className="flex-row items-center gap-0.5">
-            <Ionicons name="people-outline" size={11} color="#03DAC6" />
+            <Ionicons name="people-outline" size={11} color={secondary} />
             <Text className="text-xs text-text-disabled">{recipe.servings} srv</Text>
           </View>
         </View>

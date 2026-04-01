@@ -87,8 +87,13 @@
     @apply bg-surface-2 rounded-2xl px-4 py-3 flex-row items-center;
   }
 
-  /* Section heading */
+  /* Section heading with warm accent underline */
   .section-heading {
-    @apply text-xl font-bold text-text-high mb-3;
+    @apply text-xl font-bold text-text-high mb-3 pb-2 border-b border-primary/30;
+  }
+
+  /* Thin decorative divider line in primary accent */
+  .section-divider {
+    @apply my-3 border-b border-primary/20;
   }
 }

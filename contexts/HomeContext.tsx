@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { getOrCreateHome } from '@/lib/homes';
 import type { Home } from '@/types/database';
@@ -23,7 +23,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadHome = async () => {
+  const loadHome = useCallback(async () => {
     if (!session?.user?.id) {
       setIsLoading(false);
       return;
@@ -35,16 +35,15 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       const userHome = await getOrCreateHome(session.user.id);
       setHome(userHome);
     } catch (err) {
-      console.error('[HomeContext] Failed to load/create home:', err);
       setError('Failed to load household data');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session?.user?.id]);
 
   useEffect(() => {
     loadHome();
-  }, [session?.user?.id]);
+  }, [loadHome]);
 
   return (
     <HomeContext.Provider value={{ home, isLoading, error, refresh: loadHome }}>

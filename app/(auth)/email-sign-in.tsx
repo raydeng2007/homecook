@@ -74,6 +74,7 @@ export default function EmailSignInScreen() {
           {/* Back Button */}
           <Pressable
             onPress={() => router.back()}
+            testID="signin-back-btn"
             className="mt-14 mb-6 flex-row items-center"
           >
             <Text className="text-primary text-lg leading-none mr-1">‹</Text>
@@ -105,6 +106,7 @@ export default function EmailSignInScreen() {
               autoCapitalize="none"
               autoComplete="email"
               autoCorrect={false}
+              testID="signin-email-input"
             />
 
             <FormInput
@@ -120,6 +122,7 @@ export default function EmailSignInScreen() {
               placeholder="Enter your password"
               secureTextEntry
               autoComplete="password"
+              testID="signin-password-input"
             />
           </View>
 
@@ -136,11 +139,12 @@ export default function EmailSignInScreen() {
             onPress={handleSignIn}
             isLoading={isLoading}
             disabled={!isFormValid}
+            testID="signin-submit-btn"
           />
 
           {/* Sign Up Link */}
           <View className="mt-6 items-center">
-            <Pressable onPress={() => router.replace('/(auth)/email-sign-up')}>
+            <Pressable onPress={() => router.replace('/(auth)/email-sign-up')} testID="signin-signup-link">
               <Text className="text-text-medium">
                 Don't have an account?{' '}
                 <Text className="text-primary font-semibold">Sign Up</Text>

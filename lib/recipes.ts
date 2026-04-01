@@ -24,16 +24,104 @@ export async function getRecipes(homeId: string): Promise<Recipe[]> {
  * Returns empty array on error instead of throwing.
  */
 export async function getAllRecipes(): Promise<Recipe[]> {
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from('recipes')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(0, 4999); // Override PostgREST default 1000-row limit
 
   if (error) {
-    console.error('[Recipes] getAllRecipes failed:', error.message);
     return [];
   }
   return (data ?? []) as Recipe[];
+}
+
+const PAGE_SIZE = 20;
+
+/**
+ * Get a page of recipes for infinite scroll (Public cookbook tab).
+ * Returns recipes for the given page + whether more pages exist.
+ */
+export async function getRecipesPage(
+  page: number,
+  pageSize: number = PAGE_SIZE
+): Promise<{ recipes: Recipe[]; hasMore: boolean; total: number }> {
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
+    .from('recipes')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  if (error) {
+    return { recipes: [], hasMore: false, total: 0 };
+  }
+
+  const recipes = (data ?? []) as Recipe[];
+  const total = count ?? 0;
+  const hasMore = from + recipes.length < total;
+
+  return { recipes, hasMore, total };
+}
+
+/**
+ * Get the user's personal recipe collection:
+ *   - Self-created recipes (source = 'user')
+ *   - Bookmarked/saved recipes from the public cookbook
+ * Used by the Personal tab and AddMealModal.
+ */
+export async function getPersonalRecipes(userId: string): Promise<Recipe[]> {
+  // 1. Fetch user-created recipes
+  const { data: ownData, error: ownError } = await supabase
+    .from('recipes')
+    .select('*')
+    .eq('created_by', userId)
+    .eq('source', 'user')
+    .order('created_at', { ascending: false });
+
+  if (ownError) {
+    // silently ignore
+  }
+
+  // 2. Fetch bookmarked recipe IDs
+  const { data: savedData, error: savedError } = await supabase
+    .from('saved_recipes')
+    .select('recipe_id')
+    .eq('user_id', userId);
+
+  if (savedError) {
+    // silently ignore
+  }
+
+  const savedIds = (savedData ?? []).map((r) => r.recipe_id);
+
+  // 3. Fetch bookmarked recipes (if any)
+  let savedRecipes: Recipe[] = [];
+  if (savedIds.length > 0) {
+    const { data, error } = await supabase
+      .from('recipes')
+      .select('*')
+      .in('id', savedIds)
+      .order('created_at', { ascending: false });
+
+    if (!error) {
+      savedRecipes = (data ?? []) as Recipe[];
+    }
+  }
+
+  // 4. Merge and deduplicate (own first, then saved)
+  const seen = new Set<string>();
+  const merged: Recipe[] = [];
+  for (const r of [...(ownData ?? []), ...savedRecipes]) {
+    if (!seen.has((r as Recipe).id)) {
+      seen.add((r as Recipe).id);
+      merged.push(r as Recipe);
+    }
+  }
+
+  return merged;
 }
 
 /**

@@ -98,3 +98,72 @@ export async function addMemberByUserId(
   if (error) throw error;
   return data as HomeMember;
 }
+
+/**
+ * Join a household by invite code.
+ *
+ * Atomically: removes user from their old (empty) home, adds them to the
+ * target home as a member. Old home is cleaned up if nobody else is in it.
+ */
+export async function joinHomeByCode(
+  userId: string,
+  code: string
+): Promise<Home> {
+  const { data, error } = await supabase.rpc('join_home_by_code', {
+    p_user_id: userId,
+    p_code: code,
+  });
+
+  if (error) throw error;
+
+  const home = Array.isArray(data) ? data[0] : data;
+  if (!home) throw new Error('Failed to join home');
+
+  return home as Home;
+}
+
+/**
+ * Regenerate the invite code for a household (owner action).
+ * Returns the new code.
+ */
+export async function regenerateInviteCode(homeId: string): Promise<string> {
+  const { data, error } = await supabase.rpc('regenerate_invite_code', {
+    p_home_id: homeId,
+  });
+
+  if (error) throw error;
+  return data as string;
+}
+
+/**
+ * Leave the current household.
+ *
+ * Removes the user from their current home and creates a fresh home for them.
+ * Returns the new home.
+ */
+export async function leaveHome(userId: string): Promise<Home> {
+  const { data, error } = await supabase.rpc('leave_home', {
+    p_user_id: userId,
+  });
+
+  if (error) throw error;
+
+  const home = Array.isArray(data) ? data[0] : data;
+  if (!home) throw new Error('Failed to leave home');
+
+  return home as Home;
+}
+
+/**
+ * Permanently delete the user's account and all associated data.
+ *
+ * Removes: home membership, personal recipes, bookmarks, meal plans,
+ * and the auth user record. If the home is now empty, it's cleaned up too.
+ */
+export async function deleteAccount(userId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_user_account', {
+    p_user_id: userId,
+  });
+
+  if (error) throw error;
+}

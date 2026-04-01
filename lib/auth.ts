@@ -6,12 +6,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 const redirectTo = makeRedirectUri();
 
-// Log the redirect URL so you can add it to Supabase
-console.log('[Auth] Redirect URI:', redirectTo);
-
 export async function signInWithGoogle() {
-  console.log('[Auth] Starting Google sign-in, redirectTo:', redirectTo);
-
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
@@ -20,45 +15,23 @@ export async function signInWithGoogle() {
     },
   });
 
-  if (error) {
-    console.error('[Auth] OAuth error:', error);
-    throw error;
-  }
-
-  console.log('[Auth] OAuth URL:', data?.url);
+  if (error) throw error;
 
   if (data?.url) {
-    try {
-      console.log('[Auth] Opening browser...');
-      const result = await WebBrowser.openAuthSessionAsync(
-        data.url,
-        redirectTo,
-        { showInRecents: true }
-      );
-      console.log('[Auth] Browser result:', JSON.stringify(result));
+    const result = await WebBrowser.openAuthSessionAsync(
+      data.url,
+      redirectTo,
+      { showInRecents: true }
+    );
 
-      if (result.type === 'success' && result.url) {
-        console.log('[Auth] Redirect URL:', result.url);
-        await createSessionFromUrl(result.url);
-      } else if (result.type === 'cancel') {
-        console.log('[Auth] User cancelled');
-      } else if (result.type === 'dismiss') {
-        console.log('[Auth] Browser dismissed');
-      }
-    } catch (browserError) {
-      console.error('[Auth] Browser error:', browserError);
-      throw browserError;
+    if (result.type === 'success' && result.url) {
+      await createSessionFromUrl(result.url);
     }
-  } else {
-    console.warn('[Auth] No URL returned from signInWithOAuth');
   }
 }
 
 async function createSessionFromUrl(url: string) {
-  console.log('[Auth] Parsing URL:', url);
   const parsedUrl = new URL(url);
-  console.log('[Auth] URL hash:', parsedUrl.hash);
-  console.log('[Auth] URL search:', parsedUrl.search);
 
   // Try hash first (implicit flow), then search params (PKCE flow)
   let params = new URLSearchParams(parsedUrl.hash.substring(1));
@@ -72,25 +45,19 @@ async function createSessionFromUrl(url: string) {
     refresh_token = params.get('refresh_token');
   }
 
-  console.log('[Auth] access_token found:', !!access_token);
-  console.log('[Auth] refresh_token found:', !!refresh_token);
-
   if (access_token && refresh_token) {
-    const { data, error } = await supabase.auth.setSession({
+    const { error } = await supabase.auth.setSession({
       access_token,
       refresh_token,
     });
-    console.log('[Auth] setSession result:', { data: !!data?.session, error });
     if (error) throw error;
   } else {
     // Check for error in URL
     const error = params.get('error');
     const errorDescription = params.get('error_description');
     if (error) {
-      console.error('[Auth] OAuth error in URL:', error, errorDescription);
       throw new Error(errorDescription || error);
     }
-    console.warn('[Auth] No tokens found in redirect URL');
   }
 }
 
@@ -137,8 +104,6 @@ export async function signUpWithEmail(
   password: string,
   fullName?: string
 ): Promise<EmailAuthResult> {
-  console.log('[Auth] signUpWithEmail called for:', email.trim().toLowerCase());
-
   const { data, error } = await supabase.auth.signUp({
     email: email.trim().toLowerCase(),
     password,
@@ -147,15 +112,12 @@ export async function signUpWithEmail(
     },
   });
 
-  console.log('[Auth] signUp response - error:', error?.message, 'user:', !!data.user);
-
   if (error) {
     return { success: false, error: mapAuthError(error.message) };
   }
 
   // Supabase returns user with empty identities array if email confirmation is required
   const needsEmailConfirmation = data.user?.identities?.length === 0;
-  console.log('[Auth] needsEmailConfirmation:', needsEmailConfirmation);
 
   return { success: true, needsEmailConfirmation };
 }

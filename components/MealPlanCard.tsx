@@ -11,8 +11,8 @@ type MealPlanCardProps = {
 };
 
 export default function MealPlanCard({ mealPlan, onDelete }: MealPlanCardProps) {
-  const { textDisabled } = useThemeColors();
-  const mealColor = MEAL_TYPE_COLORS[mealPlan.meal_type] ?? '#BB86FC';
+  const { textDisabled, primary } = useThemeColors();
+  const mealColor = MEAL_TYPE_COLORS[mealPlan.meal_type] ?? primary;
   const mealLabel = MEAL_TYPE_LABELS[mealPlan.meal_type] ?? mealPlan.meal_type;
 
   return (

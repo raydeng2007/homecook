@@ -1,38 +1,54 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { vars } from 'nativewind';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const THEME_STORAGE_KEY = '@homecook_theme';
 
 export type ThemeMode = 'dark' | 'light';
 
+// ──────────────────────────────────────────────────────
+// Bordeaux & Champagne palette
+// To swap palette: update hex values here + useThemeColors.ts + tailwind warm[]
+// ──────────────────────────────────────────────────────
+
 const DARK_VARS = vars({
-  '--color-bg': '#121212',
-  '--color-surface-1': '#1E1E1E',
-  '--color-surface-2': '#232323',
-  '--color-surface-3': '#252525',
-  '--color-surface-4': '#272727',
-  '--color-surface-5': '#2C2C2C',
-  '--color-text-high': 'rgba(255,255,255,0.87)',
-  '--color-text-medium': 'rgba(255,255,255,0.60)',
-  '--color-text-disabled': 'rgba(255,255,255,0.38)',
-  '--color-on-primary': '#000000',
-  '--color-border-subtle': 'rgba(255,255,255,0.08)',
-  '--color-border-card': 'rgba(187,134,252,0.12)',
-  '--color-border-focus': 'rgba(187,134,252,0.35)',
+  // Surfaces — warm brown-tinted (from palette #0D0C00 → #402814)
+  '--color-bg': '#0D0C00',
+  '--color-surface-1': '#161210',
+  '--color-surface-2': '#1E1814',
+  '--color-surface-3': '#261F1A',
+  '--color-surface-4': '#302620',
+  '--color-surface-5': '#402814',
+  // Text — warm off-white
+  '--color-text-high': 'rgba(250,243,235,0.90)',
+  '--color-text-medium': 'rgba(250,243,235,0.62)',
+  '--color-text-disabled': 'rgba(250,243,235,0.38)',
+  // On-primary (text on champagne buttons — dark brown)
+  '--color-on-primary': '#1A0F08',
+  // Borders — champagne-tinted
+  '--color-border-subtle': 'rgba(217,185,145,0.08)',
+  '--color-border-card': 'rgba(217,185,145,0.15)',
+  '--color-border-focus': 'rgba(217,185,145,0.35)',
 });
 
 const LIGHT_VARS = vars({
-  '--color-bg': '#FAFAFA',
+  // Surfaces — warm cream/parchment
+  '--color-bg': '#FAF3EB',
   '--color-surface-1': '#FFFFFF',
-  '--color-surface-2': '#F5F5F5',
-  '--color-surface-3': '#EEEEEE',
-  '--color-surface-4': '#E0E0E0',
-  '--color-surface-5': '#D6D6D6',
-  '--color-text-high': 'rgba(0,0,0,0.87)',
-  '--color-text-medium': 'rgba(0,0,0,0.60)',
-  '--color-text-disabled': 'rgba(0,0,0,0.38)',
-  '--color-on-primary': '#FFFFFF',
-  '--color-border-subtle': 'rgba(0,0,0,0.06)',
-  '--color-border-card': 'rgba(187,134,252,0.15)',
-  '--color-border-focus': 'rgba(187,134,252,0.40)',
+  '--color-surface-2': '#F5EDE3',
+  '--color-surface-3': '#EDE4D9',
+  '--color-surface-4': '#E0D5C8',
+  '--color-surface-5': '#D4C9BC',
+  // Text — warm dark brown
+  '--color-text-high': 'rgba(38,1,1,0.90)',
+  '--color-text-medium': 'rgba(38,1,1,0.62)',
+  '--color-text-disabled': 'rgba(38,1,1,0.38)',
+  // On-primary (text on champagne buttons — cream white)
+  '--color-on-primary': '#FAF3EB',
+  // Borders — bordeaux-tinted
+  '--color-border-subtle': 'rgba(64,1,6,0.08)',
+  '--color-border-card': 'rgba(64,1,6,0.15)',
+  '--color-border-focus': 'rgba(64,40,20,0.35)',
 });
 
 type ThemeContextType = {
@@ -52,8 +68,21 @@ const ThemeContext = createContext<ThemeContextType>({
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<ThemeMode>('dark');
 
+  // Load persisted theme on mount
+  useEffect(() => {
+    AsyncStorage.getItem(THEME_STORAGE_KEY).then((stored) => {
+      if (stored === 'light' || stored === 'dark') {
+        setMode(stored);
+      }
+    });
+  }, []);
+
   const toggleTheme = useCallback(() => {
-    setMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setMode((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      AsyncStorage.setItem(THEME_STORAGE_KEY, next);
+      return next;
+    });
   }, []);
 
   const isDark = mode === 'dark';

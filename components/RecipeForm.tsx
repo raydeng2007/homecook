@@ -120,6 +120,7 @@ export default function RecipeForm({
           value={title}
           onChangeText={setTitle}
           error={errors.title}
+          testID="recipe-title-input"
         />
 
         {/* Description */}
@@ -131,6 +132,7 @@ export default function RecipeForm({
           error={errors.description}
           multiline
           numberOfLines={2}
+          testID="recipe-desc-input"
         />
 
         {/* Servings & Calories row */}
@@ -143,6 +145,7 @@ export default function RecipeForm({
               onChangeText={setServings}
               error={errors.servings}
               keyboardType="numeric"
+              testID="recipe-servings-input"
             />
           </View>
           <View className="flex-1">
@@ -153,6 +156,7 @@ export default function RecipeForm({
               onChangeText={setCalories}
               error={errors.calories}
               keyboardType="numeric"
+              testID="recipe-calories-input"
             />
           </View>
         </View>
@@ -216,6 +220,7 @@ export default function RecipeForm({
           title={submitLabel}
           onPress={handleSubmit}
           isLoading={isLoading}
+          testID="recipe-save-btn"
         />
       </ScrollView>
     </KeyboardAvoidingView>

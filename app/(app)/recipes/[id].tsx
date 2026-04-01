@@ -1,22 +1,77 @@
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { getRecipe, deleteRecipe } from '@/lib/recipes';
 import { getSavedRecipeIds, saveRecipe, unsaveRecipe } from '@/lib/saved-recipes';
+import { scaleIngredients, scaleCalories, caloriesPerServing, formatQuantity } from '@/lib/portion-scaling';
 import RecipeImage from '@/components/RecipeImage';
-import NutritionBadges from '@/components/NutritionBadges';
+import ServingStepper from '@/components/ServingStepper';
 import type { Recipe } from '@/types/database';
 
 type DetailTab = 'ingredients' | 'instructions';
 
+/**
+ * Parse raw instruction text into individual steps.
+ * Handles multiple formats from TheMealDB and user input:
+ *   - "STEP 1\nDo this.\nSTEP 2\nDo that."
+ *   - "1. Do this.\n2. Do that."
+ *   - "1) Do this.\n2) Do that."
+ *   - Plain paragraphs separated by double newlines
+ *   - Single string with \r\n line breaks
+ */
+function parseInstructionSteps(raw: string): string[] {
+  if (!raw || !raw.trim()) return [];
+
+  // Normalize line endings
+  const text = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  // Try splitting by "STEP N" pattern (case insensitive)
+  const stepPattern = /\bSTEP\s+\d+\b/gi;
+  if (stepPattern.test(text)) {
+    const parts = text
+      .split(/\bSTEP\s+\d+\b/gi)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts.length > 1) return parts;
+  }
+
+  // Try splitting by numbered lines: "1. ", "2) ", "1- ", etc.
+  const numberedPattern = /^\d+[\.\)\-]\s+/m;
+  if (numberedPattern.test(text)) {
+    const parts = text
+      .split(/\n(?=\d+[\.\)\-]\s+)/)
+      .map((s) => s.replace(/^\d+[\.\)\-]\s+/, '').trim())
+      .filter(Boolean);
+    if (parts.length > 1) return parts;
+  }
+
+  // Try splitting by double newlines (paragraphs)
+  const paragraphs = text
+    .split(/\n\s*\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (paragraphs.length > 1) return paragraphs;
+
+  // Fall back to single newlines
+  const lines = text
+    .split(/\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (lines.length > 1) return lines;
+
+  // Single block — return as-is
+  return [text.trim()];
+}
+
 export default function RecipeDetailScreen() {
   const router = useRouter();
   const { session } = useAuth();
-  const { statusBarStyle, textHigh, primary, error } = useThemeColors();
+  const { statusBarStyle, textHigh, textMedium, primary, secondary, error } = useThemeColors();
   const userId = session?.user?.id;
   const { id } = useLocalSearchParams<{ id: string }>();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
@@ -24,19 +79,25 @@ export default function RecipeDetailScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>('ingredients');
+  const [adjustedServings, setAdjustedServings] = useState<number>(0);
+
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadRecipe = useCallback(async () => {
     if (!id) return;
     try {
       setIsLoading(true);
+      setLoadError(null);
       const [data, savedIds] = await Promise.all([
         getRecipe(id),
         userId ? getSavedRecipeIds(userId) : Promise.resolve(new Set<string>()),
       ]);
       setRecipe(data);
+      setAdjustedServings(data.servings); // Initialize to recipe default
       setIsSaved(savedIds.has(id));
     } catch (err) {
-      console.error('[RecipeDetail] Failed to load:', err);
+      const message = err instanceof Error ? err.message : 'Failed to load recipe';
+      setLoadError(message);
     } finally {
       setIsLoading(false);
     }
@@ -45,6 +106,24 @@ export default function RecipeDetailScreen() {
   useEffect(() => {
     loadRecipe();
   }, [loadRecipe]);
+
+  // ── Scaled data (recomputed when servings change) ──
+  const scaledIngredients = useMemo(() => {
+    if (!recipe) return [];
+    return scaleIngredients(recipe.ingredients, recipe.servings, adjustedServings);
+  }, [recipe, adjustedServings]);
+
+  const scaledCalories = useMemo(() => {
+    if (!recipe) return null;
+    return scaleCalories(recipe.calories, recipe.servings, adjustedServings);
+  }, [recipe, adjustedServings]);
+
+  const perServingCal = useMemo(() => {
+    if (!recipe) return null;
+    return caloriesPerServing(recipe.calories, recipe.servings);
+  }, [recipe]);
+
+  const isScaled = recipe ? adjustedServings !== recipe.servings : false;
 
   const handleToggleSave = async () => {
     if (!id || !userId) return;
@@ -57,7 +136,6 @@ export default function RecipeDetailScreen() {
       }
     } catch (err) {
       setIsSaved((prev) => !prev); // revert
-      console.error('[RecipeDetail] Save toggle failed:', err);
     }
   };
 
@@ -78,7 +156,6 @@ export default function RecipeDetailScreen() {
               await deleteRecipe(id);
               router.back();
             } catch (err) {
-              console.error('[RecipeDetail] Delete failed:', err);
               Alert.alert('Error', 'Failed to delete recipe');
               setIsDeleting(false);
             }
@@ -93,6 +170,10 @@ export default function RecipeDetailScreen() {
     router.push({ pathname: '/(app)/recipes/edit', params: { id } });
   };
 
+  const handleResetServings = () => {
+    if (recipe) setAdjustedServings(recipe.servings);
+  };
+
   if (isLoading) {
     return (
       <View className="screen items-center justify-center">
@@ -105,16 +186,31 @@ export default function RecipeDetailScreen() {
     return (
       <View className="screen items-center justify-center px-6">
         <Ionicons name="alert-circle-outline" size={48} color={error} />
-        <Text className="text-error mt-4">Recipe not found</Text>
-        <Pressable
-          onPress={() => router.back()}
-          className="mt-4 px-4 py-2 rounded-lg bg-surface-3"
-        >
-          <Text className="text-text-medium">Go back</Text>
-        </Pressable>
+        <Text className="text-error mt-4">{loadError ? 'Failed to load recipe' : 'Recipe not found'}</Text>
+        {loadError && (
+          <Text className="text-text-disabled text-sm mt-1 text-center">{loadError}</Text>
+        )}
+        <View className="flex-row gap-3 mt-4">
+          {loadError && (
+            <Pressable
+              onPress={loadRecipe}
+              className="px-4 py-2 rounded-lg bg-primary"
+            >
+              <Text className="text-on-primary font-medium">Retry</Text>
+            </Pressable>
+          )}
+          <Pressable
+            onPress={() => router.back()}
+            className="px-4 py-2 rounded-lg bg-surface-3"
+          >
+            <Text className="text-text-medium">Go back</Text>
+          </Pressable>
+        </View>
       </View>
     );
   }
+
+  const isOwnRecipe = recipe.created_by === userId;
 
   return (
     <View className="screen">
@@ -147,25 +243,29 @@ export default function RecipeDetailScreen() {
               color={isSaved ? primary : textHigh}
             />
           </Pressable>
-          <Pressable
-            onPress={handleEdit}
-            className="w-10 h-10 items-center justify-center rounded-full bg-surface-3 active:bg-surface-5"
-            accessibilityLabel="Edit recipe"
-          >
-            <Ionicons name="pencil" size={16} color={primary} />
-          </Pressable>
-          <Pressable
-            onPress={handleDelete}
-            disabled={isDeleting}
-            className="w-10 h-10 items-center justify-center rounded-full bg-surface-3 active:bg-surface-5"
-            accessibilityLabel="Delete recipe"
-          >
-            {isDeleting ? (
-              <ActivityIndicator size="small" color={error} />
-            ) : (
-              <Ionicons name="trash" size={16} color={error} />
-            )}
-          </Pressable>
+          {isOwnRecipe && (
+            <Pressable
+              onPress={handleEdit}
+              className="w-10 h-10 items-center justify-center rounded-full bg-surface-3 active:bg-surface-5"
+              accessibilityLabel="Edit recipe"
+            >
+              <Ionicons name="pencil" size={16} color={primary} />
+            </Pressable>
+          )}
+          {isOwnRecipe && (
+            <Pressable
+              onPress={handleDelete}
+              disabled={isDeleting}
+              className="w-10 h-10 items-center justify-center rounded-full bg-surface-3 active:bg-surface-5"
+              accessibilityLabel="Delete recipe"
+            >
+              {isDeleting ? (
+                <ActivityIndicator size="small" color={error} />
+              ) : (
+                <Ionicons name="trash" size={16} color={error} />
+              )}
+            </Pressable>
+          )}
         </View>
       </View>
 
@@ -193,12 +293,50 @@ export default function RecipeDetailScreen() {
           </Text>
         </View>
 
-        {/* Nutrition badges */}
+        {/* Serving adjuster + nutrition info */}
         <View className="px-5 mb-5">
-          <NutritionBadges
-            calories={recipe.calories}
-            servings={recipe.servings}
-          />
+          <View className="flex-row items-center gap-3">
+            {/* Serving stepper */}
+            <ServingStepper
+              value={adjustedServings}
+              onChange={setAdjustedServings}
+            />
+
+            {/* Nutrition badges (scaled) */}
+            <View className="flex-1 flex-row gap-2 flex-wrap">
+              {scaledCalories != null && (
+                <View className="flex-row items-center gap-1.5 bg-surface-2 px-3 py-2 rounded-full">
+                  <Ionicons name="flame-outline" size={14} color={primary} />
+                  <Text className="text-xs text-text-high font-medium">
+                    {scaledCalories} kcal
+                  </Text>
+                </View>
+              )}
+
+              {perServingCal != null && (
+                <View className="flex-row items-center gap-1.5 bg-surface-2 px-3 py-2 rounded-full">
+                  <Ionicons name="person-outline" size={14} color={secondary} />
+                  <Text className="text-xs text-text-high font-medium">
+                    {perServingCal}/serving
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Scaled indicator */}
+          {isScaled && (
+            <Pressable
+              onPress={handleResetServings}
+              className="flex-row items-center gap-1.5 mt-2"
+            >
+              <Ionicons name="information-circle-outline" size={14} color={primary} />
+              <Text className="text-xs text-primary">
+                Scaled from {recipe.servings} servings
+              </Text>
+              <Text className="text-xs text-text-disabled ml-1">• Tap to reset</Text>
+            </Pressable>
+          )}
         </View>
 
         {/* Tab bar: Ingredients / Instructions */}
@@ -239,23 +377,23 @@ export default function RecipeDetailScreen() {
         <View className="px-5">
           {activeTab === 'ingredients' ? (
             <View className="card">
-              {Array.isArray(recipe.ingredients) && recipe.ingredients.length > 0 ? (
-                recipe.ingredients.map((ing, idx) => (
+              {Array.isArray(scaledIngredients) && scaledIngredients.length > 0 ? (
+                scaledIngredients.map((ing, idx) => (
                   <View
                     key={idx}
                     className={`flex-row items-center py-3 ${
-                      idx < recipe.ingredients.length - 1
+                      idx < scaledIngredients.length - 1
                         ? 'border-b border-surface-3'
                         : ''
                     }`}
                   >
                     <View className="w-2 h-2 rounded-full bg-primary mr-3" />
                     <Text className="text-text-high flex-1">{ing.name}</Text>
-                    {ing.quantity && (
+                    {ing.quantity ? (
                       <Text className="text-text-medium text-sm">
                         {ing.quantity} {ing.unit}
                       </Text>
-                    )}
+                    ) : null}
                   </View>
                 ))
               ) : (
@@ -264,9 +402,33 @@ export default function RecipeDetailScreen() {
             </View>
           ) : (
             <View className="card">
-              <Text className="text-text-high text-base leading-6">
-                {recipe.instructions}
-              </Text>
+              {(() => {
+                const steps = parseInstructionSteps(recipe.instructions);
+                if (steps.length <= 1) {
+                  return (
+                    <Text className="text-text-high text-base leading-7">
+                      {recipe.instructions}
+                    </Text>
+                  );
+                }
+                return steps.map((step, idx) => (
+                  <View
+                    key={idx}
+                    className={`flex-row ${idx > 0 ? 'mt-5' : ''}`}
+                  >
+                    {/* Step number badge */}
+                    <View className="w-7 h-7 rounded-full bg-primary/20 items-center justify-center mr-3 mt-0.5">
+                      <Text className="text-primary text-xs font-bold">
+                        {idx + 1}
+                      </Text>
+                    </View>
+                    {/* Step text */}
+                    <Text className="text-text-high text-base leading-7 flex-1">
+                      {step}
+                    </Text>
+                  </View>
+                ));
+              })()}
             </View>
           )}
         </View>

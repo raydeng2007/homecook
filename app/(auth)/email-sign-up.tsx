@@ -84,10 +84,10 @@ export default function EmailSignUpScreen() {
     >
       <StatusBar style={statusBarStyle} />
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 px-6">
+        <View className="px-6">
           {/* Back Button */}
           <Pressable
             onPress={() => router.back()}

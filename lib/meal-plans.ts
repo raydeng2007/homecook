@@ -91,12 +91,13 @@ export async function getMealPlansForRange(
   startDate: string, // YYYY-MM-DD
   endDate: string    // YYYY-MM-DD
 ): Promise<MealPlanWithFullRecipe[]> {
+  // Try with normalized_ingredients (available after migration-008)
   const { data, error } = await supabase
     .from('meal_plans')
     .select(
       `
       *,
-      recipe:recipes!recipe_id (id, title, ingredients, servings)
+      recipe:recipes!recipe_id (id, title, ingredients, normalized_ingredients, servings)
     `
     )
     .eq('home_id', homeId)
@@ -104,6 +105,26 @@ export async function getMealPlansForRange(
     .lte('date', endDate)
     .order('date', { ascending: true })
     .order('meal_type', { ascending: true });
+
+  // Fallback: if normalized_ingredients column doesn't exist yet, query without it
+  if (error?.code === '42703') {
+    const { data: fallback, error: fallbackError } = await supabase
+      .from('meal_plans')
+      .select(
+        `
+        *,
+        recipe:recipes!recipe_id (id, title, ingredients, servings)
+      `
+      )
+      .eq('home_id', homeId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', { ascending: true })
+      .order('meal_type', { ascending: true });
+
+    if (fallbackError) throw fallbackError;
+    return (fallback ?? []) as unknown as MealPlanWithFullRecipe[];
+  }
 
   if (error) throw error;
   return (data ?? []) as unknown as MealPlanWithFullRecipe[];

@@ -5,6 +5,7 @@
 export interface Home {
   id: string;
   name: string;
+  invite_code: string;
   created_by: string;
   created_at: string;
 }
@@ -23,6 +24,15 @@ export interface Ingredient {
   unit: string;
 }
 
+/** Server-normalized ingredient (populated by DB trigger) */
+export interface NormalizedIngredient {
+  name: string;       // normalized canonical name
+  raw_name: string;   // original ingredient name
+  quantity: string;
+  unit: string;
+  category: IngredientCategory;
+}
+
 export type RecipeSource = 'user' | 'themealdb' | 'spoonacular';
 
 export interface Recipe {
@@ -38,6 +48,7 @@ export interface Recipe {
   category: string | null;
   source: RecipeSource;
   source_id: string | null;
+  normalized_ingredients: NormalizedIngredient[] | null;
   created_by: string;
   created_at: string;
 }
@@ -83,7 +94,7 @@ export interface MealPlanWithRecipe extends MealPlan {
 
 /** MealPlan with full recipe data (including ingredients) */
 export interface MealPlanWithFullRecipe extends MealPlan {
-  recipe: Pick<Recipe, 'id' | 'title' | 'ingredients' | 'servings'>;
+  recipe: Pick<Recipe, 'id' | 'title' | 'ingredients' | 'normalized_ingredients' | 'servings'>;
 }
 
 /** A recipe the user has saved/bookmarked to their personal collection */
@@ -138,8 +149,8 @@ export const MEAL_TYPE_LABELS: Record<MealType, string> = {
 };
 
 export const MEAL_TYPE_COLORS: Record<MealType, string> = {
-  breakfast: '#FFB74D', // orange
-  lunch: '#03DAC6',     // teal/secondary
-  dinner: '#BB86FC',    // purple/primary
-  snack: '#81C784',     // green
+  breakfast: '#E8C088', // warm light gold
+  lunch: '#8B5E3C',     // warm brown
+  dinner: '#8B3A3A',    // dusty bordeaux
+  snack: '#8FB88E',     // sage green
 };

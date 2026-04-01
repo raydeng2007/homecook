@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import '../global.css';
 
 function ThemeRoot({ children }: { children: React.ReactNode }) {
@@ -36,12 +37,14 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ThemeRoot>
-          <RootLayoutNav />
-        </ThemeRoot>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <ThemeRoot>
+            <RootLayoutNav />
+          </ThemeRoot>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

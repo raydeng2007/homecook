@@ -72,17 +72,17 @@ export const CATEGORY_ICONS: Record<IngredientCategory, string> = {
 };
 
 export const CATEGORY_COLORS: Record<IngredientCategory, string> = {
-  produce: '#66BB6A',   // green
-  dairy: '#42A5F5',     // blue
-  meat: '#EF5350',      // red
-  seafood: '#26C6DA',   // cyan
-  grains: '#FFCA28',    // amber
-  spices: '#AB47BC',    // purple
-  condiments: '#FF7043', // deep orange
-  baking: '#8D6E63',    // brown
-  canned: '#78909C',    // blue grey
-  frozen: '#80DEEA',    // light cyan
-  other: '#BDBDBD',     // grey
+  produce: '#8FB88E',   // sage green
+  dairy: '#C9A882',     // warm tan
+  meat: '#8B3A3A',      // dusty bordeaux
+  seafood: '#7DB8B0',   // muted teal
+  grains: '#D9B991',    // champagne
+  spices: '#A05040',    // warm spice
+  condiments: '#D4AA70', // golden
+  baking: '#8B7355',    // warm brown
+  canned: '#B8A08E',    // warm gray
+  frozen: '#A8C8C2',    // muted mint
+  other: '#9E9488',     // warm gray
 };
 
 /** Category display order for shopping list sections */

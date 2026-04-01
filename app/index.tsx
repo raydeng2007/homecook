@@ -8,7 +8,7 @@ export default function Index() {
   if (isLoading) {
     return (
       <View className="screen items-center justify-center">
-        <ActivityIndicator size="large" color="#BB86FC" />
+        <ActivityIndicator size="large" color="#D9B991" />
       </View>
     );
   }
