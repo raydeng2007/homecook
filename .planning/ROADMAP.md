@@ -78,7 +78,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Testing Foundation | 0/3 | Not started | - |
+| 1. Testing Foundation | 0/3 | Planned    |  |
 | 2. Security and Stability | 0/? | Not started | - |
 | 3. Store Compliance | 0/? | Not started | - |
 | 4. Submission | 0/? | Not started | - |
