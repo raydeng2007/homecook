@@ -7,6 +7,7 @@ module.exports = {
       '|expo(nent)?' +
       '|@expo(nent)?/.*' +
       '|@expo-google-fonts/.*' +
+      '|expo-modules-core' +
       '|react-navigation' +
       '|@react-navigation/.*' +
       '|@unimodules/.*' +
