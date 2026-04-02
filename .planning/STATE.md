@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-04-01T02:01:28.671Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-04-01T02:02:22.007Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 4
@@ -52,7 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
-| Phase 01-testing-foundation P02 | 6 | 3 tasks | 10 files |
+| Phase 01 P03 | 20 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -63,9 +63,7 @@ Recent decisions affecting current work:
 
 - Init: Jest + jest-expo for unit tests; Maestro kept for E2E; security before features
 - Init: Fix security/stability before adding tests (tests on broken foundations waste effort)
-- [Phase 01-testing-foundation]: Extracted formatDateKey/getWeekRange/formatWeekLabel into lib/date-utils.ts from 5 duplicate locations
-- [Phase 01-testing-foundation]: expo-modules-core must be in jest transformIgnorePatterns — jest-expo setup imports it as ESM
-- [Phase 01-testing-foundation]: Use new Date(year, month, day) in tests (not ISO strings) for CI timezone safety
+- [Phase 01]: formatQuantity FRACTION_MAP tolerance window: 0.625 matches before 0.667 entry, causing 0.667 → ⅝ (not ⅔); tests document actual behavior
 
 ### Pending Todos
 
@@ -80,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T02:01:28.668Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-04-01T02:02:22.004Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None
