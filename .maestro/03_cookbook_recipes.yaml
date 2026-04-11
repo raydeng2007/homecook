@@ -1,0 +1,44 @@
+appId: host.exp.Exponent
+---
+# Test 3: Cookbook Screen - Recipe List, Search, Tabs
+# Prerequisites: User is logged in
+
+# Navigate to Cookbook tab
+- tapOn: "Cookbook"
+
+# Verify cookbook screen elements
+- extendedWaitUntil:
+    visible: "Cookbook"
+    timeout: 10000
+
+# Test search functionality with keyboard
+- tapOn: "Search recipes..."
+  optional: true
+- tapOn:
+    text: "Search"
+    optional: true
+
+# Type search query - verify keyboard doesn't obstruct results
+- inputText: "chicken"
+- takeScreenshot: "cookbook_search_keyboard"
+
+# Clear search
+- clearInput
+
+# Test tab switching - My Recipes / All Recipes
+- tapOn: "My Recipes"
+  optional: true
+- takeScreenshot: "cookbook_my_recipes"
+
+- tapOn: "All Recipes"
+  optional: true
+- takeScreenshot: "cookbook_all_recipes"
+
+# Scroll down to verify recipe list loads
+- scroll
+- takeScreenshot: "cookbook_scrolled"
+
+# Scroll back up
+- scrollUntilVisible:
+    element: "Cookbook"
+    direction: "UP"

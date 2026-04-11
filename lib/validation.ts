@@ -41,6 +41,20 @@ export function validatePasswordMatch(
   return null;
 }
 
+export function validateRecipeTitle(title: string): string | null {
+  const trimmed = title.trim();
+  if (!trimmed) return 'Title is required';
+  if (trimmed.length > 100) return 'Title must be 100 characters or less';
+  return null;
+}
+
+export function validateRecipeDescription(description: string): string | null {
+  const trimmed = description.trim();
+  if (!trimmed) return 'Description is required';
+  if (trimmed.length > 500) return 'Description must be 500 characters or less';
+  return null;
+}
+
 export function validateName(name: string): string | null {
   const trimmed = name.trim();
 

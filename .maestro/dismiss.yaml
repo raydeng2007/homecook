@@ -1,0 +1,6 @@
+appId: host.exp.Exponent
+---
+- tapOn:
+    point: "50%,90%"
+- waitForAnimationToEnd
+- takeScreenshot: "dismiss_done"

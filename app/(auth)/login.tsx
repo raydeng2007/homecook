@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { SocialLoginButton } from '@/components/SocialLoginButton';
-import { signInWithGoogle, signInWithFacebook } from '@/lib/auth';
+import { signInWithGoogle, signInWithFacebook, signInWithApple, isAppleSignInAvailable } from '@/lib/auth';
 
 const logoImage = require('@/assets/icon.png');
 
@@ -82,6 +82,21 @@ export default function LoginScreen() {
     }
   };
 
+  const handleAppleLogin = async () => {
+    if (isOAuthLoading) return;
+    try {
+      setIsOAuthLoading(true);
+      const result = await signInWithApple();
+      if (!result.success && result.error && result.error !== 'Sign in was cancelled.') {
+        Alert.alert('Login Error', result.error);
+      }
+    } catch (error) {
+      Alert.alert('Login Error', String(error));
+    } finally {
+      setIsOAuthLoading(false);
+    }
+  };
+
   const handleEmailLogin = () => {
     router.push('/(auth)/email-sign-in');
   };
@@ -112,6 +127,9 @@ export default function LoginScreen() {
 
       {/* Social Login Buttons */}
       <View className="w-full gap-4">
+        {isAppleSignInAvailable() && (
+          <SocialLoginButton provider="apple" onPress={handleAppleLogin} disabled={isOAuthLoading} testID="login-apple-btn" />
+        )}
         <SocialLoginButton provider="google" onPress={handleGoogleLogin} disabled={isOAuthLoading} testID="login-google-btn" />
         <SocialLoginButton provider="facebook" onPress={handleFacebookLogin} disabled={isOAuthLoading} testID="login-facebook-btn" />
         <SocialLoginButton provider="email" onPress={handleEmailLogin} disabled={isOAuthLoading} testID="login-email-btn" />

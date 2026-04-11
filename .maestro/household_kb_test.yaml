@@ -1,0 +1,43 @@
+appId: host.exp.Exponent
+---
+# Dismiss any dialogs and test household keyboard inputs
+
+# Dismiss "Enable Dictation" dialog if present
+- tapOn:
+    text: "Not Now"
+    optional: true
+- waitForAnimationToEnd
+
+# Navigate to household tab
+- tapOn:
+    id: "tab-household"
+- waitForAnimationToEnd
+- takeScreenshot: "KB4_00_household"
+
+# Try tapping the home name input directly
+- tapOn:
+    id: "household-name-input"
+- takeScreenshot: "KB4_01_name_focused"
+- inputText: "Z"
+- takeScreenshot: "KB4_02_name_typed"
+
+# Dismiss keyboard by tapping at top
+- tapOn:
+    point: "50%,5%"
+- takeScreenshot: "KB4_03_name_dismissed"
+
+# Scroll to join code input
+- scrollUntilVisible:
+    element:
+      id: "household-join-input"
+    direction: "DOWN"
+- tapOn:
+    id: "household-join-input"
+- takeScreenshot: "KB4_04_join_focused"
+- inputText: "XYZ"
+- takeScreenshot: "KB4_05_join_typed"
+
+# Done
+- tapOn:
+    point: "50%,5%"
+- takeScreenshot: "KB4_06_done"

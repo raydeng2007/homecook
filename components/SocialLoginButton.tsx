@@ -1,6 +1,6 @@
 import { Pressable, Text, View, ActivityIndicator } from 'react-native';
 
-type SocialProvider = 'google' | 'facebook' | 'email';
+type SocialProvider = 'google' | 'facebook' | 'email' | 'apple';
 
 interface SocialLoginButtonProps {
   provider: SocialProvider;
@@ -10,6 +10,7 @@ interface SocialLoginButtonProps {
 }
 
 const providerConfig: Record<SocialProvider, { label: string; icon: string }> = {
+  apple: { label: 'Continue with Apple', icon: '' },
   google: { label: 'Continue with Google', icon: 'G' },
   facebook: { label: 'Continue with Facebook', icon: 'f' },
   email: { label: 'Continue with Email', icon: '@' },

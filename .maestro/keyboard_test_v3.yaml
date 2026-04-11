@@ -1,0 +1,62 @@
+appId: host.exp.Exponent
+---
+# === POST-LOGIN KEYBOARD TEST ===
+# Tests keyboard on cookbook search, recipe create form, household inputs
+# Assumes already logged in (home screen visible)
+
+# Wait for home screen
+- extendedWaitUntil:
+    visible: "Chef"
+    timeout: 15000
+- takeScreenshot: "KB3_00_home"
+
+# === COOKBOOK SEARCH ===
+- tapOn:
+    id: "tab-cookbook"
+- waitForAnimationToEnd
+- takeScreenshot: "KB3_01_cookbook"
+
+- tapOn:
+    id: "cookbook-search-input"
+- takeScreenshot: "KB3_02_search_focused"
+- inputText: "chicken"
+- takeScreenshot: "KB3_03_search_typed"
+
+# Dismiss keyboard by tapping header
+- tapOn:
+    text: "Cookbook"
+- takeScreenshot: "KB3_04_search_dismissed"
+
+# === HOUSEHOLD INPUTS ===
+- tapOn:
+    id: "tab-household"
+- waitForAnimationToEnd
+- takeScreenshot: "KB3_05_household"
+
+# Edit home name
+- tapOn:
+    id: "household-name-input"
+- takeScreenshot: "KB3_06_name_focused"
+- inputText: "X"
+- takeScreenshot: "KB3_07_name_typed"
+
+# Dismiss keyboard by tapping section header
+- tapOn:
+    text: "Household"
+- takeScreenshot: "KB3_08_name_dismissed"
+
+# Scroll to join code input
+- scrollUntilVisible:
+    element:
+      id: "household-join-input"
+    direction: "DOWN"
+- tapOn:
+    id: "household-join-input"
+- takeScreenshot: "KB3_09_join_focused"
+- inputText: "ABC"
+- takeScreenshot: "KB3_10_join_typed"
+
+# Done
+- tapOn:
+    text: "Household"
+- takeScreenshot: "KB3_11_done"

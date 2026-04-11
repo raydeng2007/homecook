@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HomeCook — Meal Planning for Households</title>
+  <meta name="description" content="Plan meals, share recipes, and build shopping lists together. HomeCook is the meal planning app built for households.">
+  <meta property="og:title" content="HomeCook — Meal Planning for Households">
+  <meta property="og:description" content="Plan meals, share recipes, and build shopping lists together.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://homecook.live">
+  <link rel="icon" type="image/png" href="/icon.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0e0e0e;
+      --surface-1: #1a1a1a;
+      --surface-2: #222222;
+      --surface-3: #2a2a2a;
+      --primary: #BB86FC;
+      --primary-dim: rgba(187, 134, 252, 0.12);
+      --secondary: #03DAC6;
+      --secondary-dim: rgba(3, 218, 198, 0.12);
+      --text-high: rgba(255, 255, 255, 0.87);
+      --text-medium: rgba(255, 255, 255, 0.60);
+      --text-disabled: rgba(255, 255, 255, 0.38);
+      --border: rgba(255, 255, 255, 0.08);
+      --warm-1: #FF8A65;
+      --warm-2: #FFB74D;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-high);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 24px;
+      backdrop-filter: blur(20px);
+      background: rgba(14, 14, 14, 0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-brand img { width: 32px; height: 32px; }
+    .nav-brand span {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-high);
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-medium);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text-high); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(187,134,252,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 32px;
+      animation: float 6s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-6px) rotate(1.5deg); }
+      75% { transform: translateY(4px) rotate(-1deg); }
+    }
+
+    .hero-sub {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      font-size: 18px;
+      color: var(--text-medium);
+      max-width: 480px;
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #000;
+    }
+    .btn-primary:hover {
+      background: #c99dfd;
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text-high);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: var(--surface-1);
+    }
+    .btn svg { width: 20px; height: 20px; }
+
+    /* ── Features ── */
+    .features {
+      padding: 80px 24px;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    .features-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--secondary);
+      margin-bottom: 12px;
+    }
+    .features h2 {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 56px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .feature-card:hover {
+      border-color: rgba(187,134,252,0.25);
+      transform: translateY(-2px);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+    .feature-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-medium);
+      line-height: 1.7;
+    }
+
+    /* ── How it works ── */
+    .how {
+      padding: 80px 24px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .how-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--warm-1);
+      margin-bottom: 12px;
+    }
+    .how h2 {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 48px;
+    }
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .step {
+      display: flex;
+      gap: 24px;
+      position: relative;
+    }
+    .step-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .step-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: #000;
+      background: var(--primary);
+      flex-shrink: 0;
+    }
+    .step-connector {
+      width: 2px;
+      flex: 1;
+      background: linear-gradient(180deg, var(--primary), transparent);
+      min-height: 32px;
+    }
+    .step:last-child .step-connector { display: none; }
+    .step-content {
+      padding-bottom: 40px;
+    }
+    .step-content h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .step-content p {
+      font-size: 14px;
+      color: var(--text-medium);
+      line-height: 1.7;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .cta-box {
+      max-width: 560px;
+      margin: 0 auto;
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px 40px;
+    }
+    .cta-box h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .cta-box p {
+      color: var(--text-medium);
+      font-size: 15px;
+      margin-bottom: 28px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-disabled);
+      font-size: 13px;
+    }
+    .footer-left img { width: 20px; height: 20px; opacity: 0.5; }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-links a {
+      color: var(--text-disabled);
+      font-size: 13px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text-medium); }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hero { padding: 100px 20px 60px; }
+      .hero-logo { width: 96px; height: 96px; }
+      .hero-desc { font-size: 16px; }
+      .features, .how { padding: 60px 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .cta-box { padding: 36px 24px; }
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">
+        <img src="/icon.png" alt="HomeCook">
+        <span>HomeCook</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="/privacy.html">Privacy</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <img src="/icon.png" alt="HomeCook logo" class="hero-logo">
+    <p class="hero-sub">Meal planning, together</p>
+    <h1>Cook smarter<br>as a <span class="gradient">household</span></h1>
+    <p class="hero-desc">Plan your week's meals, share a calendar with your household, and get an automatic shopping list. That simple.</p>
+    <div class="hero-cta">
+      <a href="#" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        App Store
+      </a>
+      <a href="#" class="btn btn-outline">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-1.4l2.834 1.642a1 1 0 010 1.7l-2.834 1.643-2.523-2.523 2.523-2.462zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/></svg>
+        Google Play
+      </a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <p class="features-label">Everything you need</p>
+    <h2>Built for real households</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background: var(--primary-dim);">
+          <span>&#128197;</span>
+        </div>
+        <h3>Shared Calendar</h3>
+        <p>Everyone in your household sees the same meal plan. Add breakfast, lunch, dinner, or snacks to any day.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: var(--secondary-dim);">
+          <span>&#128722;</span>
+        </div>
+        <h3>Auto Shopping List</h3>
+        <p>Ingredients are automatically aggregated from the week's meals, grouped by category, and scaled by servings.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(255,138,101,0.12);">
+          <span>&#127858;</span>
+        </div>
+        <h3>700+ Recipes</h3>
+        <p>Browse a public cookbook with hundreds of recipes. Bookmark your favorites to your personal collection.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(255,183,77,0.12);">
+          <span>&#129367;</span>
+        </div>
+        <h3>Portion Control</h3>
+        <p>Adjust servings on any recipe. Ingredients and calories scale automatically with smart fraction display.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: var(--primary-dim);">
+          <span>&#128101;</span>
+        </div>
+        <h3>Household Invite</h3>
+        <p>Share a simple invite code. No email needed. Family, roommates, or partners join in seconds.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: var(--secondary-dim);">
+          <span>&#128278;</span>
+        </div>
+        <h3>Personal Bookmarks</h3>
+        <p>Your saved recipes are yours alone. The shared calendar is communal, but your cookbook stays personal.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how" id="how">
+    <p class="how-label">Get started in 60 seconds</p>
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-line">
+          <div class="step-dot">1</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <h3>Create your household</h3>
+          <p>Sign up and a household is created automatically. Name it whatever you like.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-line">
+          <div class="step-dot">2</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <h3>Invite your people</h3>
+          <p>Share your invite code via text or WhatsApp. They enter it and they're in.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-line">
+          <div class="step-dot">3</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <h3>Plan meals together</h3>
+          <p>Browse recipes, add them to dates on the shared calendar, and adjust portions.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-line">
+          <div class="step-dot">4</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <h3>Shop with one list</h3>
+          <p>Open the shopping tab and everything you need for the week is right there, grouped and ready.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-box">
+      <h2>Ready to simplify dinner?</h2>
+      <p>Join households that are already planning smarter.</p>
+      <div class="hero-cta">
+        <a href="#" class="btn btn-primary">Download Free</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-left">
+        <img src="/icon.png" alt="">
+        <span>&copy; 2026 HomeCook</span>
+      </div>
+      <div class="footer-links">
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms of Service</a>
+        <a href="mailto:hello@rayray.io">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

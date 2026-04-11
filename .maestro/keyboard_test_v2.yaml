@@ -1,0 +1,98 @@
+appId: host.exp.Exponent
+---
+# === KEYBOARD OBSTRUCTION TEST v2 ===
+# Avoids hideKeyboard (crashes SpringBoard on iOS 26.1)
+# Uses taps on non-interactive areas to dismiss keyboard
+
+# Wait for login screen
+- extendedWaitUntil:
+    visible: "Homecook"
+    timeout: 15000
+- takeScreenshot: "KB2_00_login"
+
+# Tap "Continue with Email"
+- tapOn:
+    point: "50%,74%"
+- waitForAnimationToEnd
+- takeScreenshot: "KB2_01_email_signin"
+
+# Tap email field
+- tapOn:
+    id: "signin-email-input"
+- takeScreenshot: "KB2_02_email_focused"
+- inputText: "test@homecook.live"
+- takeScreenshot: "KB2_03_email_typed"
+
+# Dismiss keyboard by tapping header
+- tapOn:
+    text: "Sign In"
+- takeScreenshot: "KB2_04_keyboard_dismissed"
+
+# Tap password field
+- tapOn:
+    id: "signin-password-input"
+- takeScreenshot: "KB2_05_password_focused"
+- inputText: "admin"
+- takeScreenshot: "KB2_06_password_typed"
+
+# Submit login by tapping sign in button
+- tapOn:
+    id: "signin-submit-btn"
+- takeScreenshot: "KB2_07_signing_in"
+
+# Wait for home screen
+- extendedWaitUntil:
+    visible: "Welcome"
+    timeout: 20000
+- takeScreenshot: "KB2_08_home"
+
+# === COOKBOOK SEARCH ===
+- tapOn:
+    id: "tab-cookbook"
+- waitForAnimationToEnd
+- takeScreenshot: "KB2_09_cookbook"
+
+- tapOn:
+    id: "cookbook-search-input"
+- takeScreenshot: "KB2_10_search_focused"
+- inputText: "chicken"
+- takeScreenshot: "KB2_11_search_typed"
+
+# Dismiss keyboard by tapping header
+- tapOn:
+    text: "Cookbook"
+- takeScreenshot: "KB2_12_search_dismissed"
+
+# === HOUSEHOLD INPUTS ===
+- tapOn:
+    id: "tab-household"
+- waitForAnimationToEnd
+- takeScreenshot: "KB2_13_household"
+
+# Edit home name
+- tapOn:
+    id: "household-name-input"
+- takeScreenshot: "KB2_14_name_focused"
+- inputText: "X"
+- takeScreenshot: "KB2_15_name_typed"
+
+# Dismiss keyboard by tapping section header
+- tapOn:
+    text: "Household"
+- takeScreenshot: "KB2_16_name_dismissed"
+
+# Scroll to join code input
+- scrollUntilVisible:
+    element:
+      id: "household-join-input"
+    direction: "DOWN"
+- tapOn:
+    id: "household-join-input"
+- takeScreenshot: "KB2_17_join_focused"
+- inputText: "ABC"
+- takeScreenshot: "KB2_18_join_typed"
+
+# Final - tap away to dismiss
+- tapOn:
+    text: "Household"
+- takeScreenshot: "KB2_19_done"

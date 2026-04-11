@@ -1,0 +1,55 @@
+appId: host.exp.Exponent
+---
+# Test 1: Login Screen & Email Auth Flow with Keyboard Testing
+
+# Wait for app to fully load
+- extendedWaitUntil:
+    visible: "Homecook"
+    timeout: 15000
+
+- assertVisible: "Homecook"
+- takeScreenshot: "01_login_screen"
+
+# Tap "Continue with Email" button (bounds: [21,616][381,672] → center ~(50%,74%))
+- tapOn:
+    point: "50%,74%"
+
+# Wait for transition
+- waitForAnimationToEnd
+- takeScreenshot: "01_email_signin_screen"
+
+# Tap on email input field (bounds: [21,209][381,256] → center ~(50%,27%))
+- tapOn:
+    point: "50%,27%"
+- takeScreenshot: "01_email_keyboard_up"
+
+# Type email address
+- inputText: "test@homecook.live"
+- takeScreenshot: "01_email_typed"
+
+# Hide keyboard
+- hideKeyboard
+
+# Tap password field (bounds: [21,297][381,344] → center ~(50%,37%))
+- tapOn:
+    point: "50%,37%"
+- takeScreenshot: "01_password_keyboard_up"
+
+# Type password
+- inputText: "admin"
+- takeScreenshot: "01_password_typed"
+
+# Hide keyboard
+- hideKeyboard
+
+# Tap Sign In button (bounds: [21,358][381,410] → center ~(50%,44%))
+- tapOn:
+    point: "50%,44%"
+- takeScreenshot: "01_signin_tapped"
+
+# Wait for home screen
+- extendedWaitUntil:
+    visible: "Welcome"
+    timeout: 20000
+
+- takeScreenshot: "01_home_screen_success"

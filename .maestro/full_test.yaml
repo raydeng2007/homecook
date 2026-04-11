@@ -1,0 +1,187 @@
+appId: host.exp.Exponent
+---
+# Dismiss any Expo Go developer menu if visible
+- tapOn:
+    point: "50%,90%"
+    retryTapIfNoChange: false
+- waitForAnimationToEnd
+
+# If we ended up on home screen, reopen the app
+- extendedWaitUntil:
+    visible: "Homecook"
+    timeout: 15000
+
+# === PHASE 1: LOGIN ===
+- takeScreenshot: "P1_01_login_screen"
+
+# Tap "Continue with Email" (bounds [21,616][381,672])
+- tapOn:
+    point: "50%,74%"
+- waitForAnimationToEnd
+- takeScreenshot: "P1_02_email_signin"
+
+# Tap email field (bounds [21,209][381,256])
+- tapOn:
+    point: "50%,27%"
+- takeScreenshot: "P1_03_email_keyboard"
+- inputText: "test@homecook.live"
+- takeScreenshot: "P1_04_email_typed"
+
+# Tap password field (bounds [21,297][381,344])
+- hideKeyboard
+- tapOn:
+    point: "50%,37%"
+- takeScreenshot: "P1_05_password_keyboard"
+- inputText: "admin"
+- takeScreenshot: "P1_06_password_typed"
+
+# Submit login
+- hideKeyboard
+- tapOn:
+    point: "50%,44%"
+- takeScreenshot: "P1_07_signing_in"
+
+# Wait for home screen
+- extendedWaitUntil:
+    visible: "Welcome"
+    timeout: 20000
+- takeScreenshot: "P1_08_home_success"
+
+# === PHASE 2: HOME / CALENDAR ===
+# Tap Today button
+- tapOn:
+    id: "home-today-btn"
+- takeScreenshot: "P2_01_today"
+
+# Switch to Month view
+- tapOn:
+    id: "home-month-toggle"
+- waitForAnimationToEnd
+- takeScreenshot: "P2_02_month_view"
+
+# Switch back to Week
+- tapOn:
+    id: "home-week-toggle"
+- waitForAnimationToEnd
+- takeScreenshot: "P2_03_week_view"
+
+# Tap Add Meal
+- tapOn:
+    id: "home-add-meal-btn"
+- waitForAnimationToEnd
+- takeScreenshot: "P2_04_add_meal_modal"
+
+# Test meal types
+- tapOn:
+    id: "meal-type-breakfast"
+- takeScreenshot: "P2_05_breakfast"
+- tapOn:
+    id: "meal-type-dinner"
+- takeScreenshot: "P2_06_dinner"
+
+# Close modal
+- tapOn:
+    id: "meal-modal-cancel"
+- waitForAnimationToEnd
+
+# === PHASE 3: COOKBOOK ===
+- tapOn:
+    id: "tab-cookbook"
+- waitForAnimationToEnd
+- takeScreenshot: "P3_01_cookbook"
+
+# Test search keyboard
+- tapOn:
+    id: "cookbook-search-input"
+- takeScreenshot: "P3_02_search_keyboard"
+- inputText: "chicken"
+- takeScreenshot: "P3_03_search_results"
+- hideKeyboard
+- eraseText: 20
+- hideKeyboard
+
+# Test tabs
+- tapOn:
+    id: "cookbook-tab-personal"
+- takeScreenshot: "P3_04_personal"
+- tapOn:
+    id: "cookbook-tab-public"
+- takeScreenshot: "P3_05_public"
+
+# Scroll
+- scroll
+- takeScreenshot: "P3_06_scrolled"
+
+# === PHASE 4: SHOPPING ===
+- tapOn:
+    id: "tab-shopping"
+- waitForAnimationToEnd
+- takeScreenshot: "P4_01_shopping"
+
+- tapOn:
+    id: "shopping-next-week"
+- takeScreenshot: "P4_02_next_week"
+- tapOn:
+    id: "shopping-prev-week"
+- takeScreenshot: "P4_03_prev_week"
+
+# === PHASE 5: HOUSEHOLD ===
+- tapOn:
+    id: "tab-household"
+- waitForAnimationToEnd
+- takeScreenshot: "P5_01_household"
+
+# Edit home name (keyboard test)
+- tapOn:
+    id: "household-name-input"
+- takeScreenshot: "P5_02_name_keyboard"
+- eraseText: 30
+- inputText: "Test Home"
+- takeScreenshot: "P5_03_name_typed"
+- hideKeyboard
+
+# Join code input (keyboard test)
+- scrollUntilVisible:
+    element:
+      id: "household-join-input"
+    direction: "DOWN"
+- tapOn:
+    id: "household-join-input"
+- takeScreenshot: "P5_04_join_keyboard"
+- inputText: "ABCDEF"
+- takeScreenshot: "P5_05_join_typed"
+- hideKeyboard
+
+# Theme toggle
+- scrollUntilVisible:
+    element:
+      id: "household-theme-toggle"
+    direction: "DOWN"
+- tapOn:
+    id: "household-theme-toggle"
+- takeScreenshot: "P5_06_light_mode"
+- tapOn:
+    id: "household-theme-toggle"
+- takeScreenshot: "P5_07_dark_mode"
+
+# === PHASE 6: TAB NAVIGATION ===
+- tapOn:
+    id: "tab-home"
+- waitForAnimationToEnd
+- takeScreenshot: "P6_01_back_home"
+- tapOn:
+    id: "tab-cookbook"
+- waitForAnimationToEnd
+- takeScreenshot: "P6_02_back_cookbook"
+- tapOn:
+    id: "tab-shopping"
+- waitForAnimationToEnd
+- takeScreenshot: "P6_03_back_shopping"
+- tapOn:
+    id: "tab-household"
+- waitForAnimationToEnd
+- takeScreenshot: "P6_04_back_household"
+- tapOn:
+    id: "tab-home"
+- waitForAnimationToEnd
+- takeScreenshot: "P6_05_final_home"

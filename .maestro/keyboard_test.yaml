@@ -1,0 +1,145 @@
+appId: host.exp.Exponent
+---
+# === KEYBOARD OBSTRUCTION TEST ===
+# Tests every input field to verify keyboard doesn't hide the active input
+
+# Wait for login screen
+- extendedWaitUntil:
+    visible: "Homecook"
+    timeout: 15000
+
+# === TEST 1: EMAIL SIGN-IN SCREEN ===
+- takeScreenshot: "KB_00_login_screen"
+
+# Tap "Continue with Email"
+- tapOn:
+    point: "50%,74%"
+- waitForAnimationToEnd
+- takeScreenshot: "KB_01_email_signin_screen"
+
+# Test email input - tap and verify keyboard doesn't cover it
+- tapOn:
+    point: "50%,27%"
+- takeScreenshot: "KB_02_email_field_keyboard_up"
+
+# Type in email field
+- inputText: "test@homecook.live"
+- takeScreenshot: "KB_03_email_typed_with_keyboard"
+
+# Test password input - tap and verify keyboard doesn't cover it
+- hideKeyboard
+- tapOn:
+    point: "50%,37%"
+- takeScreenshot: "KB_04_password_field_keyboard_up"
+
+# Type in password field
+- inputText: "admin"
+- takeScreenshot: "KB_05_password_typed_with_keyboard"
+
+# Submit login
+- hideKeyboard
+- tapOn:
+    point: "50%,44%"
+
+# Wait for home screen
+- extendedWaitUntil:
+    visible: "Welcome"
+    timeout: 20000
+- takeScreenshot: "KB_06_home_screen"
+
+# === TEST 2: COOKBOOK SEARCH INPUT ===
+- tapOn:
+    id: "tab-cookbook"
+- waitForAnimationToEnd
+- takeScreenshot: "KB_07_cookbook_screen"
+
+# Tap search input - verify keyboard doesn't cover search results
+- tapOn:
+    id: "cookbook-search-input"
+- takeScreenshot: "KB_08_search_keyboard_up"
+
+# Type search term
+- inputText: "chicken"
+- takeScreenshot: "KB_09_search_typed_with_keyboard"
+
+# Dismiss keyboard
+- hideKeyboard
+- eraseText: 20
+- hideKeyboard
+- takeScreenshot: "KB_10_search_keyboard_dismissed"
+
+# === TEST 3: RECIPE CREATE FORM ===
+# Navigate to create recipe
+- tapOn:
+    point: "90%,7%"
+- waitForAnimationToEnd
+- takeScreenshot: "KB_11_recipe_create_screen"
+
+# Tap title input
+- tapOn:
+    id: "recipe-title-input"
+- takeScreenshot: "KB_12_title_keyboard_up"
+- inputText: "Test Recipe"
+- takeScreenshot: "KB_13_title_typed"
+
+# Tap description input
+- hideKeyboard
+- tapOn:
+    id: "recipe-desc-input"
+- takeScreenshot: "KB_14_desc_keyboard_up"
+- inputText: "A test recipe description"
+- takeScreenshot: "KB_15_desc_typed"
+
+# Tap servings input
+- hideKeyboard
+- tapOn:
+    id: "recipe-servings-input"
+- takeScreenshot: "KB_16_servings_keyboard_up"
+- inputText: "4"
+- takeScreenshot: "KB_17_servings_typed"
+
+# Tap calories input
+- hideKeyboard
+- tapOn:
+    id: "recipe-calories-input"
+- takeScreenshot: "KB_18_calories_keyboard_up"
+- inputText: "300"
+- takeScreenshot: "KB_19_calories_typed"
+
+# Go back
+- hideKeyboard
+- back
+- waitForAnimationToEnd
+
+# === TEST 4: HOUSEHOLD INPUTS ===
+- tapOn:
+    id: "tab-household"
+- waitForAnimationToEnd
+- takeScreenshot: "KB_20_household_screen"
+
+# Edit home name input
+- tapOn:
+    id: "household-name-input"
+- takeScreenshot: "KB_21_name_keyboard_up"
+- eraseText: 30
+- inputText: "Test Home"
+- takeScreenshot: "KB_22_name_typed"
+
+# Join code input
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "household-join-input"
+    direction: "DOWN"
+- tapOn:
+    id: "household-join-input"
+- takeScreenshot: "KB_23_join_keyboard_up"
+- inputText: "ABCDEF"
+- takeScreenshot: "KB_24_join_typed"
+
+# Dismiss and return home
+- hideKeyboard
+- tapOn:
+    id: "tab-home"
+- waitForAnimationToEnd
+- takeScreenshot: "KB_25_final_home"

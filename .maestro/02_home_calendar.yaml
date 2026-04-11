@@ -1,0 +1,68 @@
+appId: host.exp.Exponent
+---
+# Test 2: Home Screen - Calendar & Meal Plans
+# Prerequisites: User is logged in (run 01_login first)
+
+# Verify home screen elements
+- assertVisible: "Welcome back"
+- assertVisible: "Today"
+
+# Test Week view (default)
+- assertVisible: "Week"
+- assertVisible: "Month"
+
+# Tap on different dates in the calendar
+- tapOn: "Mon"
+- takeScreenshot: "home_monday_selected"
+
+- tapOn: "Tue"
+- takeScreenshot: "home_tuesday_selected"
+
+- tapOn: "Wed"
+- takeScreenshot: "home_wednesday_selected"
+
+# Test forward navigation
+- tapOn: ">"
+- takeScreenshot: "home_next_week"
+
+# Test backward navigation
+- tapOn: "<"
+- takeScreenshot: "home_prev_week"
+
+# Test Today button
+- tapOn: "Today"
+- takeScreenshot: "home_today"
+
+# Test Month view
+- tapOn: "Month"
+- takeScreenshot: "home_month_view"
+
+# Navigate month forward
+- tapOn: ">"
+- takeScreenshot: "home_next_month"
+
+# Navigate month back
+- tapOn: "<"
+- takeScreenshot: "home_prev_month"
+
+# Switch back to Week
+- tapOn: "Week"
+- takeScreenshot: "home_week_view_back"
+
+# Test Add Meal button
+- tapOn: "Add meal"
+- extendedWaitUntil:
+    visible: "Add Meal"
+    timeout: 5000
+- takeScreenshot: "home_add_meal_modal"
+
+# Test meal type selection in modal
+- assertVisible: "Breakfast"
+- assertVisible: "Lunch"
+- assertVisible: "Dinner"
+- assertVisible: "Snack"
+
+# Close the modal (tap outside or X button)
+- tapOn: "Cancel"
+  optional: true
+- back

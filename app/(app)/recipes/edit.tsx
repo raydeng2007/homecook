@@ -24,7 +24,7 @@ export default function EditRecipeScreen() {
       const data = await getRecipe(id);
       setRecipe(data);
     } catch (err) {
-      // silently handle error
+      Alert.alert('Error', 'Failed to load recipe. Please go back and try again.');
     } finally {
       setIsPageLoading(false);
     }

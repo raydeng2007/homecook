@@ -1,6 +1,8 @@
 import { supabase } from './supabase';
 import * as WebBrowser from 'expo-web-browser';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { makeRedirectUri } from 'expo-auth-session';
+import { Platform } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -87,6 +89,45 @@ export async function signInWithFacebook() {
       await createSessionFromUrl(result.url);
     }
   }
+}
+
+// ============================================================================
+// Apple OAuth (iOS only — required by App Store Guideline 4.8)
+// ============================================================================
+
+export async function signInWithApple(): Promise<EmailAuthResult> {
+  try {
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+
+    if (!credential.identityToken) {
+      return { success: false, error: 'No identity token received from Apple.' };
+    }
+
+    const { error } = await supabase.auth.signInWithIdToken({
+      provider: 'apple',
+      token: credential.identityToken,
+    });
+
+    if (error) {
+      return { success: false, error: mapAuthError(error.message) };
+    }
+
+    return { success: true };
+  } catch (err: unknown) {
+    if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'ERR_REQUEST_CANCELED') {
+      return { success: false, error: 'Sign in was cancelled.' };
+    }
+    return { success: false, error: 'Failed to sign in with Apple. Please try again.' };
+  }
+}
+
+export function isAppleSignInAvailable(): boolean {
+  return Platform.OS === 'ios';
 }
 
 // ============================================================================

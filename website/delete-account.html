@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Your Account — HomeCook</title>
+  <link rel="icon" type="image/png" href="/icon.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0e0e0e;
+      --surface-1: #1a1a1a;
+      --primary: #BB86FC;
+      --secondary: #03DAC6;
+      --error: #CF6679;
+      --text-high: rgba(255, 255, 255, 0.87);
+      --text-medium: rgba(255, 255, 255, 0.60);
+      --text-disabled: rgba(255, 255, 255, 0.38);
+      --border: rgba(255, 255, 255, 0.08);
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-high);
+      -webkit-font-smoothing: antialiased;
+    }
+    nav {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-inner a { text-decoration: none; display: flex; align-items: center; gap: 10px; }
+    .nav-inner img { width: 28px; height: 28px; }
+    .nav-inner span { font-size: 16px; font-weight: 700; color: var(--text-high); }
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--error);
+      margin-bottom: 12px;
+    }
+    h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+    .subtitle { color: var(--text-medium); font-size: 15px; margin-bottom: 40px; line-height: 1.6; }
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 36px;
+      margin-bottom: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    h2:first-of-type { border-top: none; padding-top: 0; }
+    p, li { font-size: 15px; color: var(--text-medium); line-height: 1.8; margin-bottom: 12px; }
+    ul, ol { padding-left: 20px; }
+    strong { color: var(--text-high); }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .steps {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+    .steps ol { padding-left: 24px; }
+    .steps li { margin-bottom: 8px; }
+    .steps li:last-child { margin-bottom: 0; }
+    .warning {
+      background: rgba(207, 102, 121, 0.1);
+      border: 1px solid rgba(207, 102, 121, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    .warning p { color: var(--error); margin-bottom: 0; }
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-disabled);
+      font-size: 13px;
+      text-decoration: none;
+      margin-top: 48px;
+    }
+    .back:hover { color: var(--text-medium); }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="/">
+        <img src="/icon.png" alt="HomeCook">
+        <span>HomeCook</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="content">
+    <p class="badge">Account</p>
+    <h1>Delete Your Account</h1>
+    <p class="subtitle">You can delete your HomeCook account and all associated data at any time. This action is permanent and cannot be undone.</p>
+
+    <h2>How to Delete Your Account</h2>
+
+    <div class="steps">
+      <ol>
+        <li>Open the <strong>HomeCook</strong> app</li>
+        <li>Go to the <strong>Household</strong> tab (bottom right)</li>
+        <li>Scroll down and tap <strong>"Delete Account"</strong></li>
+        <li>Confirm the deletion when prompted</li>
+      </ol>
+    </div>
+
+    <h2>What Gets Deleted</h2>
+    <p>When you delete your account, we permanently remove:</p>
+    <ul>
+      <li><strong>Your profile</strong> — name, email address, and login credentials</li>
+      <li><strong>Your recipes</strong> — any recipes you personally created</li>
+      <li><strong>Your bookmarks</strong> — saved recipes from the public cookbook</li>
+      <li><strong>Your meal plans</strong> — meals you added to the calendar</li>
+      <li><strong>Your household membership</strong> — you will be removed from any shared household</li>
+    </ul>
+
+    <div class="warning">
+      <p><strong>This action is permanent.</strong> Once your account is deleted, your data cannot be recovered. If you are the sole owner of a household, the household and all its shared data will also be deleted.</p>
+    </div>
+
+    <h2>Alternative: Email Request</h2>
+    <p>If you cannot access the app, you can request account deletion by emailing <a href="mailto:hello@rayray.io">hello@rayray.io</a> from the email address associated with your account. We will process your request within 7 days.</p>
+
+    <h2>Facebook Login Users</h2>
+    <p>If you signed up using Facebook Login, deleting your HomeCook account will also remove all data we received from Facebook. You can also manage your Facebook app connections at <a href="https://www.facebook.com/settings?tab=applications">Facebook Settings → Apps and Websites</a>.</p>
+
+    <a href="/" class="back">&larr; Back to HomeCook</a>
+  </div>
+</body>
+</html>

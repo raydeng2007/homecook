@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useCallback, useEffect } from 'react';
 import * as Clipboard from 'expo-clipboard';
+import * as Linking from 'expo-linking';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHome } from '@/contexts/HomeContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -27,7 +28,7 @@ export default function HouseholdScreen() {
   const { session } = useAuth();
   const { home, refresh: refreshHome } = useHome();
   const { isDark, toggleTheme } = useTheme();
-  const { primary, textHigh, textMedium, onPrimary, statusBarStyle, secondary, error: errorColor, primaryVariant } = useThemeColors();
+  const { primary, textHigh, textMedium, textDisabled, onPrimary, statusBarStyle, secondary, error: errorColor, primaryVariant } = useThemeColors();
 
   const [members, setMembers] = useState<HomeMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -583,6 +584,33 @@ export default function HouseholdScreen() {
                   thumbColor={isDark ? primary : '#FAF3EB'}
                 />
               </View>
+            </View>
+
+            {/* Legal */}
+            <View className="px-5 pt-5">
+              <Text className="text-xs text-text-disabled font-medium uppercase tracking-wider mb-3">
+                Legal
+              </Text>
+              <Pressable
+                onPress={() => Linking.openURL('https://homecook.live/privacy')}
+                className="card flex-row items-center gap-3 py-3 mb-2"
+              >
+                <View className="w-9 h-9 rounded-xl bg-primary/15 items-center justify-center">
+                  <Ionicons name="shield-checkmark-outline" size={18} color={primary} />
+                </View>
+                <Text className="text-text-high font-medium text-sm">Privacy Policy</Text>
+                <Ionicons name="open-outline" size={14} color={textDisabled} style={{ marginLeft: 'auto' }} />
+              </Pressable>
+              <Pressable
+                onPress={() => Linking.openURL('https://homecook.live/terms')}
+                className="card flex-row items-center gap-3 py-3"
+              >
+                <View className="w-9 h-9 rounded-xl bg-primary/15 items-center justify-center">
+                  <Ionicons name="document-text-outline" size={18} color={primary} />
+                </View>
+                <Text className="text-text-high font-medium text-sm">Terms of Service</Text>
+                <Ionicons name="open-outline" size={14} color={textDisabled} style={{ marginLeft: 'auto' }} />
+              </Pressable>
             </View>
 
             {/* Danger zone */}

@@ -1,0 +1,93 @@
+appId: host.exp.Exponent
+---
+# Test 4: Recipe Create - Form Fields & Keyboard Obstruction
+# Prerequisites: User is logged in, on Cookbook screen
+
+# Navigate to Cookbook tab
+- tapOn: "Cookbook"
+- extendedWaitUntil:
+    visible: "Cookbook"
+    timeout: 10000
+
+# Tap create/add recipe button (the + FAB or create button)
+- tapOn: "New Recipe"
+  optional: true
+- tapOn:
+    text: "Create"
+    optional: true
+- tapOn:
+    text: "+"
+    optional: true
+
+- takeScreenshot: "recipe_create_screen"
+
+# Test Recipe Title input with keyboard
+- tapOn: "Recipe title"
+  optional: true
+- tapOn: "Title"
+  optional: true
+- inputText: "Test Recipe From Maestro"
+- takeScreenshot: "recipe_create_title_keyboard"
+
+# Test Description field with keyboard
+- tapOn: "Description"
+  optional: true
+- tapOn: "Brief description"
+  optional: true
+- inputText: "A delicious test recipe created during automated testing"
+- takeScreenshot: "recipe_create_desc_keyboard"
+
+# Scroll down to see more fields
+- scroll
+
+# Test Servings field
+- tapOn: "Servings"
+  optional: true
+- inputText: "4"
+- takeScreenshot: "recipe_create_servings_keyboard"
+
+# Test Calories field
+- tapOn: "Calories"
+  optional: true
+- inputText: "350"
+- takeScreenshot: "recipe_create_calories_keyboard"
+
+# Test Prep Time field
+- tapOn: "Prep"
+  optional: true
+- inputText: "15"
+
+# Test Cook Time field
+- tapOn: "Cook"
+  optional: true
+- inputText: "30"
+
+- takeScreenshot: "recipe_create_times"
+
+# Scroll down to ingredients
+- scroll
+
+# Test adding an ingredient with keyboard
+- tapOn: "Ingredient"
+  optional: true
+- tapOn: "Name"
+  optional: true
+- inputText: "Chicken breast"
+- takeScreenshot: "recipe_create_ingredient_keyboard"
+
+# Scroll down further to instructions
+- scroll
+- scroll
+
+# Test adding an instruction with keyboard
+- tapOn: "Step 1"
+  optional: true
+- tapOn: "Instruction"
+  optional: true
+- inputText: "Preheat oven to 375 degrees F"
+- takeScreenshot: "recipe_create_instruction_keyboard"
+
+# Scroll to bottom to find save button
+- scroll
+- scroll
+- takeScreenshot: "recipe_create_bottom"

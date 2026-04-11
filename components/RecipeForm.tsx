@@ -50,8 +50,11 @@ export default function RecipeForm({
     const newErrors: Record<string, string> = {};
 
     if (!title.trim()) newErrors.title = 'Title is required';
+    else if (title.trim().length > 100) newErrors.title = 'Title must be 100 characters or less';
     if (!description.trim()) newErrors.description = 'Description is required';
+    else if (description.trim().length > 500) newErrors.description = 'Description must be 500 characters or less';
     if (!instructions.trim()) newErrors.instructions = 'Instructions are required';
+    else if (instructions.trim().length > 5000) newErrors.instructions = 'Instructions must be 5000 characters or less';
 
     const validIngredients = ingredients.filter((i) => i.name.trim());
     if (validIngredients.length === 0) {

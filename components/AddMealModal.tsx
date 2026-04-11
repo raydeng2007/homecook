@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Modal, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, Modal, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -50,7 +50,7 @@ export default function AddMealModal({
       const data = await getPersonalRecipes(userId);
       setRecipes(data);
     } catch (err) {
-      // silently handle error
+      Alert.alert('Error', 'Failed to load recipes. Please try again.');
     } finally {
       setIsLoadingRecipes(false);
     }
@@ -103,7 +103,7 @@ export default function AddMealModal({
       onAdded();
       onClose();
     } catch (err) {
-      // silently handle error
+      Alert.alert('Error', 'Failed to add meal to plan. Please try again.');
     } finally {
       setIsSaving(false);
     }

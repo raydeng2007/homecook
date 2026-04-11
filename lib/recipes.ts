@@ -82,7 +82,7 @@ export async function getPersonalRecipes(userId: string): Promise<Recipe[]> {
     .order('created_at', { ascending: false });
 
   if (ownError) {
-    // silently ignore
+    console.warn('Failed to load own recipes:', ownError.message);
   }
 
   // 2. Fetch bookmarked recipe IDs
@@ -92,7 +92,7 @@ export async function getPersonalRecipes(userId: string): Promise<Recipe[]> {
     .eq('user_id', userId);
 
   if (savedError) {
-    // silently ignore
+    console.warn('Failed to load saved recipe IDs:', savedError.message);
   }
 
   const savedIds = (savedData ?? []).map((r) => r.recipe_id);
