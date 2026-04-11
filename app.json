@@ -51,7 +51,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#121212"
       },
-      "package": "io.rayray.homecook",
+      "package": "live.homecook.app",
       "versionCode": 1,
       "permissions": [
         "INTERNET"
