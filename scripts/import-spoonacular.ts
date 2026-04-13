@@ -16,6 +16,7 @@
  */
 import { supabase, TARGET_HOME_ID, TARGET_CREATED_BY } from './supabase-admin.js';
 import { normalizeName, guessCategory, parseMeasure } from './ingredient-normalizer.js';
+import { cleanIngredients } from './ingredient-quality.js';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -242,12 +243,16 @@ async function main() {
           continue;
         }
 
-        // Map ingredients
-        const ingredients = recipe.extendedIngredients.map((ing) => ({
+        // Map ingredients & clean
+        const rawIngredients = recipe.extendedIngredients.map((ing) => ({
           name: ing.name,
           quantity: String(ing.amount || ''),
           unit: ing.unit || '',
         }));
+        const { cleaned: ingredients, issues } = cleanIngredients(rawIngredients);
+        if (issues.length > 0) {
+          console.log(`   🧹 ${recipe.title}: ${issues.join('; ')}`);
+        }
 
         // Track canonical ingredients
         for (const ing of ingredients) {

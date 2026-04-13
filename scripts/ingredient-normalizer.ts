@@ -137,6 +137,11 @@ export function parseMeasure(measure: string): { quantity: string; unit: string 
       qty = total.toString();
     }
 
+    // "X servings" is meaningless for individual ingredients
+    if (/^servings?$/i.test(unit)) {
+      return { quantity: '', unit: '' };
+    }
+
     return { quantity: qty, unit };
   }
 

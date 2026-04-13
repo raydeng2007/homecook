@@ -9,6 +9,7 @@
  */
 import { supabase, TARGET_HOME_ID, TARGET_CREATED_BY } from './supabase-admin.js';
 import { normalizeName, guessCategory, parseMeasure } from './ingredient-normalizer.js';
+import { cleanIngredients } from './ingredient-quality.js';
 
 const API_BASE = 'https://www.themealdb.com/api/json/v1/1';
 
@@ -144,8 +145,12 @@ async function main() {
         continue;
       }
 
-      // Extract ingredients
-      const ingredients = extractIngredients(detail);
+      // Extract ingredients & clean
+      const rawIngredients = extractIngredients(detail);
+      const { cleaned: ingredients, issues } = cleanIngredients(rawIngredients);
+      if (issues.length > 0) {
+        console.log(`   ${progress} 🧹 ${detail.strMeal}: ${issues.join('; ')}`);
+      }
 
       // Track canonical ingredients
       for (const ing of ingredients) {
