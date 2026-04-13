@@ -8,7 +8,7 @@ A meal planning app for households built with Expo and React Native.
 - **Language**: TypeScript (strict)
 - **Styling**: NativeWind v4 (Tailwind for React Native)
 - **Backend**: Supabase (auth, database)
-- **State**: React Context (AuthContext, HomeContext)
+- **State**: React Context (AuthContext, HomeContext, ThemeContext)
 - **Node**: v22+ (use `nvm use` before running commands)
 
 ## Project Structure
@@ -20,7 +20,7 @@ homecook/
 │   ├── index.tsx             # Root redirect (auth-aware)
 │   ├── (auth)/
 │   │   ├── _layout.tsx       # Auth stack
-│   │   ├── login.tsx         # Login screen (Google/Facebook/Email)
+│   │   ├── login.tsx         # Login screen (Google/Facebook/Apple/Email)
 │   │   ├── email-sign-in.tsx # Email sign-in form
 │   │   ├── email-sign-up.tsx # Email sign-up form
 │   │   └── email-confirmation.tsx # Email verification screen
@@ -33,28 +33,49 @@ homecook/
 │       │   ├── create.tsx    # Create recipe form
 │       │   ├── [id].tsx      # Recipe detail
 │       │   └── edit.tsx      # Edit recipe form
-│       ├── shopping.tsx      # Shopping list tab (placeholder)
-│       └── household.tsx     # Household management tab
+│       ├── planner.tsx       # Meal planner screen (hidden tab, week view)
+│       ├── shopping.tsx      # Shopping list tab (auto-generated from meal plans)
+│       └── household.tsx     # Household management + legal links
 ├── components/
-│   ├── CustomTabBar.tsx      # Bottom tab bar with center "+" FAB
-│   ├── MonthCalendar.tsx     # Calendar month view component
-│   ├── RecipeForm.tsx        # Shared create/edit recipe form
-│   ├── IngredientRow.tsx     # Dynamic ingredient input row
-│   ├── MealPlanCard.tsx      # Meal plan display card
 │   ├── AddMealModal.tsx      # Modal to add meal to date
+│   ├── CategoryChips.tsx     # Ingredient category filter chips
+│   ├── CustomTabBar.tsx      # Bottom tab bar (4 tabs)
+│   ├── ErrorBoundary.tsx     # Global error boundary
 │   ├── FormInput.tsx         # Reusable text input
+│   ├── HexagonShape.tsx      # Hexagon SVG for calendar date selector
+│   ├── IngredientRow.tsx     # Dynamic ingredient input row
 │   ├── LoadingButton.tsx     # Button with loading state
-│   └── SocialLoginButton.tsx # OAuth provider button
+│   ├── MealPlanCard.tsx      # Meal plan display card
+│   ├── MealTypeTabBar.tsx    # Breakfast/Lunch/Dinner/Snack tabs
+│   ├── MonthCalendarGrid.tsx # Calendar month grid view
+│   ├── NutritionBadges.tsx   # Calorie/protein/carb badges
+│   ├── RecipeDiaryCard.tsx   # Compact recipe card for diary view
+│   ├── RecipeForm.tsx        # Shared create/edit recipe form
+│   ├── RecipeHeroCard.tsx    # Large recipe display card
+│   ├── RecipeImage.tsx       # Recipe image with fallback
+│   ├── RecipeThumbCard.tsx   # Thumbnail recipe card
+│   ├── ServingStepper.tsx    # +/- serving size control
+│   ├── SocialLoginButton.tsx # OAuth provider button (Google/Facebook/Apple)
+│   └── WeekCalendarStrip.tsx # Horizontal week day strip
 ├── contexts/
 │   ├── AuthContext.tsx        # Supabase session management
-│   └── HomeContext.tsx        # Household auto-setup + provider
+│   ├── HomeContext.tsx        # Household auto-setup + provider
+│   └── ThemeContext.tsx       # Dark/light theme with AsyncStorage persistence
+├── hooks/
+│   └── useThemeColors.ts     # Raw color strings for non-className props
 ├── lib/
 │   ├── supabase.ts           # Supabase client singleton
-│   ├── auth.ts               # Auth functions (Google, Facebook, Email)
+│   ├── auth.ts               # Auth functions (Google, Facebook, Apple, Email)
 │   ├── validation.ts         # Form validators
 │   ├── homes.ts              # Home/household CRUD
 │   ├── recipes.ts            # Recipe CRUD
-│   └── meal-plans.ts         # Meal plan queries
+│   ├── saved-recipes.ts      # Bookmarked/saved recipes
+│   ├── meal-plans.ts         # Meal plan queries
+│   ├── date-utils.ts         # Shared date formatting (formatDateKey, getWeekRange)
+│   ├── ingredient-normalize.ts # Ingredient normalization for shopping lists
+│   ├── ingredient-categories.ts # Ingredient category detection
+│   ├── portion-scaling.ts    # Recipe serving size scaling
+│   └── recipe-visuals.ts     # Recipe image/color helpers
 ├── types/
 │   └── database.ts           # TypeScript interfaces for DB entities
 ├── global.css                # Tailwind base + component classes
@@ -67,6 +88,9 @@ homecook/
 nvm use                       # Switch to correct Node version
 npx expo start --clear        # Start dev server (clear cache)
 npx tsc --noEmit              # Type check
+npm test                      # Run Jest unit tests (291 tests)
+npx eas build --platform android --profile production  # Android AAB build
+npx eas build --platform ios --profile production      # iOS IPA build
 ```
 
 ## Code Style
@@ -78,19 +102,23 @@ npx tsc --noEmit              # Type check
 
 ## Design System
 
-Material Design dark theme (see `tailwind.config.js`):
+Warm artisanal dark theme with bordeaux/champagne palette (see `tailwind.config.js` + `contexts/ThemeContext.tsx`):
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `primary` | `#BB86FC` | Buttons, accents, interactive |
-| `secondary` | `#03DAC6` | Secondary actions, highlights |
-| `background` | `#121212` | Screen backgrounds |
+| `primary` | `#D9B991` (champagne gold) | Buttons, accents, interactive |
+| `secondary` | `#8B3A3A` (dusty bordeaux) | Secondary actions, highlights |
+| `error` | `#E07A5F` (warm terracotta) | Error states |
+| `background` | `#0D0C00` dark / `#FAF3EB` light | Screen backgrounds |
 | `surface-1` to `surface-5` | Progressively lighter | Cards, elevation |
-| `text-high` | 87% white | Primary text |
-| `text-medium` | 60% white | Secondary text |
-| `text-disabled` | 38% white | Disabled states |
+| `text-high` | 90% opacity | Primary text |
+| `text-medium` | 62% opacity | Secondary text |
+| `text-disabled` | 38% opacity | Disabled states |
+| `border-subtle` / `border-card` / `border-focus` | Warm-toned borders | Element borders |
 
-Utility classes in `global.css`: `card`, `btn-primary`, `heading-1`, `heading-2`, `screen`
+Theme is togglable (dark/light) via `ThemeContext` with `AsyncStorage` persistence. Never hardcode hex values — use Tailwind tokens or `useThemeColors()`.
+
+Utility classes in `global.css`: `card`, `card-elevated`, `btn-primary`, `btn-secondary`, `btn-outline`, `btn-error`, `heading-1`, `heading-2`, `body-text`, `body-text-medium`, `muted-text`, `disabled-text`, `input`, `pill-chip`, `pill-chip-active`, `search-bar`, `screen`
 
 ## Architecture
 
@@ -99,6 +127,7 @@ Utility classes in `global.css`: `card`, `btn-primary`, `heading-1`, `heading-2`
 2. `useAuth()` hook provides `session` and `isLoading`
 3. Root layout redirects: no session → `/(auth)/login`, session → `/(app)`
 4. Google/Facebook OAuth uses `expo-web-browser` + `makeRedirectUri()` from `expo-auth-session`
+5. Apple Sign In (iOS only) uses native `expo-apple-authentication` + Supabase `signInWithIdToken()`
 
 ### Home/Household Flow
 1. `HomeProvider` wraps all authenticated tabs
@@ -129,7 +158,7 @@ When I say **"review mode"**: Critique the current implementation. Look for bugs
 ## Workflow
 
 After implementing any feature:
-1. TypeScript check runs automatically via post-edit hook
+1. Run `npx tsc --noEmit` to type check
 2. Start web preview with `preview_start` (name: "web")
 3. Take screenshots and click through the new feature to verify
 4. Fix any issues found
@@ -139,23 +168,24 @@ After implementing any feature:
 
 - [x] Google OAuth
 - [x] Facebook OAuth
+- [x] Apple Sign In (iOS native)
 - [x] Email/password auth
-- [x] Post Log-in screen: modern calendar (month view, auto-set to current date)
-- [x] Bottom sticky navbar with 4 tabs + center "+" FAB button
-- [x] Four tabs: Home (Calendar), Recipes (list/management), Shopping (placeholder), Household (user info + placeholder)
-- [x] Recipe CRUD (Supabase tables) — create, read, update, delete with form validation
-- [x] Meal planning calendar — assign recipes to dates, view daily plans, remove meals
-- [x] IMPORTANT: Update to new design that looks like `design.png` in root folder, keep the functionality the same, but just reorganize the screen to make it look modern and sleek, NOTE: The design .png is in light mode, however, I want the default to be dark mode, and have an option later to switch to light mode if the user wants.
-- [x] I want the dark mode to still re-use the same color pallets that's configurable and toggable
-- [x] For the calander selector, I want the border or outlien of the date selector, right now it's a shaded circle, I want it to be a stlyistic, sleek and elegant and symtetrical hexagon shade instead of a circle, if you can.
-- [x] Add stylistically interesting border colors, like the calander and other in "focus" elements, and don't just do black and whit eor sharp contrast, do something off-white or sometingn elegant and clena aned modern and sleek.
+- [x] Calendar meal planning with hexagon date selector
+- [x] Bottom sticky navbar with 4 tabs
+- [x] Recipe CRUD with form validation + input length limits
+- [x] Meal planning calendar — assign recipes to dates, view daily plans
+- [x] Warm artisanal dark/light theme (bordeaux/champagne palette)
 - [x] Shopping list: auto-generate ingredient list from week's meal plans
 - [x] Household management: invite members, manage roles
 - [x] Recipe search/filter
-- [ ] Supabase Row Level Security (RLS) policies for multi-household support
-
-## Bug List
-- [x] Right now on the recipe / calandar view, when clicking on different dates, the "recipe" list still displays the current date's recipe, it should display the recipe planned for the day the user is clicking on the calandar for.
+- [x] Unit tests (291 tests, 8 suites — validation, date-utils, ingredient-normalize, etc.)
+- [x] iOS Privacy Manifest (PrivacyInfo.xcprivacy)
+- [x] Android API 35 targeting
+- [x] Legal pages (privacy, terms, delete account) at homecook.live
+- [x] Error handling hardened (silent catches replaced with alerts/warnings)
+- [x] Supabase RLS enabled on all tables
+- [ ] App Store submission (pending Apple Developer enrollment)
+- [ ] Google Play submission (closed testing in progress)
 
 
 ## Don'ts
@@ -248,7 +278,7 @@ A meal planning app for households built with Expo and React Native, targeting i
 - Config: `eas.json`
 - Profiles: `development` (simulator), `preview` (internal distribution), `production` (auto-increment)
 - iOS bundle ID: `io.rayray.homecook`
-- Android package: `io.rayray.homecook`
+- Android package: `live.homecook.app`
 - `.env` file present - contains Supabase configuration
 - Environment variables accessed via `process.env.EXPO_PUBLIC_*` prefix
 - Required vars: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`
