@@ -76,6 +76,12 @@ None yet.
 - Camera/photo permissions in app.json may not be used — audit during Phase 3; unused permissions cause rejection
 - `getAllRecipes()` returns `[]` silently on error — address error contract inconsistency during Phase 2
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260420-s9l | Fix search results not persisting on recipes tab after navigating to recipe detail and back | 2026-04-21 | 0e77c77 | [260420-s9l-fix-search-results-not-persisting-on-rec](./quick/260420-s9l-fix-search-results-not-persisting-on-rec/) |
+
 ## Session Continuity
 
 Last session: 2026-04-21T00:27:08Z
