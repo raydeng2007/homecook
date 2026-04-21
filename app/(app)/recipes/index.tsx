@@ -8,57 +8,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { getRecipesPage, getAllRecipes, getPersonalRecipes } from '@/lib/recipes';
 import { getSavedRecipeIds, saveRecipe, unsaveRecipe } from '@/lib/saved-recipes';
+import { smartSearch } from '@/lib/recipe-search';
 import RecipeDiaryCard from '@/components/RecipeDiaryCard';
 import type { Recipe } from '@/types/database';
 
 type CookbookTab = 'public' | 'personal';
-
-// ── Smart search: keyword matching across title, description, category, ingredients ──
-
-const CUISINE_KEYWORDS: Record<string, string[]> = {
-  mexican: ['taco', 'burrito', 'enchilada', 'quesadilla', 'salsa', 'guacamole', 'tortilla', 'nacho', 'fajita', 'churro', 'tamale'],
-  italian: ['pasta', 'pizza', 'risotto', 'lasagna', 'lasagne', 'gnocchi', 'pesto', 'bruschetta', 'tiramisu', 'carbonara', 'bolognese', 'ravioli', 'fettuccine', 'penne', 'spaghetti', 'crostini', 'panzanella', 'caprese'],
-  chinese: ['stir fry', 'wok', 'dumpling', 'dim sum', 'fried rice', 'lo mein', 'chow mein', 'kung pao', 'sweet and sour', 'spring roll', 'szechuan', 'mapo'],
-  japanese: ['sushi', 'ramen', 'teriyaki', 'tempura', 'miso', 'udon', 'sashimi', 'katsu', 'gyoza', 'onigiri', 'matcha'],
-  indian: ['curry', 'tikka', 'masala', 'naan', 'biryani', 'tandoori', 'samosa', 'dal', 'paneer', 'vindaloo', 'korma', 'chutney'],
-  thai: ['pad thai', 'curry', 'satay', 'tom yum', 'green curry', 'red curry', 'massaman', 'basil chicken'],
-  french: ['croissant', 'ratatouille', 'quiche', 'crepe', 'souffle', 'bouillabaisse', 'coq au vin', 'crème brûlée', 'baguette', 'brioche'],
-  mediterranean: ['hummus', 'falafel', 'tabbouleh', 'shawarma', 'pita', 'tzatziki', 'dolma', 'baklava', 'fattoush'],
-  american: ['burger', 'bbq', 'barbecue', 'mac and cheese', 'fried chicken', 'cornbread', 'coleslaw', 'hot dog', 'biscuit'],
-  korean: ['bibimbap', 'kimchi', 'bulgogi', 'japchae', 'tteokbokki', 'galbi', 'banchan'],
-};
-
-function smartSearch(recipes: Recipe[], query: string): Recipe[] {
-  const q = query.toLowerCase().trim();
-  if (!q) return recipes;
-
-  const expandedTerms = [q];
-  for (const [cuisine, keywords] of Object.entries(CUISINE_KEYWORDS)) {
-    if (q.includes(cuisine)) {
-      expandedTerms.push(...keywords);
-    }
-  }
-
-  const queryTerms = q.split(/\s+/).filter(Boolean);
-
-  return recipes.filter((r) => {
-    const title = r.title.toLowerCase();
-    const desc = r.description.toLowerCase();
-    const cat = (r.category ?? '').toLowerCase();
-    const ingNames = r.ingredients.map((i) => i.name.toLowerCase()).join(' ');
-    const searchable = `${title} ${desc} ${cat} ${ingNames}`;
-
-    for (const term of expandedTerms) {
-      if (searchable.includes(term)) return true;
-    }
-
-    if (queryTerms.length > 1) {
-      return queryTerms.every((term) => searchable.includes(term));
-    }
-
-    return false;
-  });
-}
 
 // ── Component ──────────────────────────────────────────────────────────
 
@@ -171,12 +125,20 @@ export default function CookbookScreen() {
   // ── Load data on focus ──
   useFocusEffect(
     useCallback(() => {
+      // Don't wipe an active search's cache when coming back from recipe
+      // detail — users lose their results otherwise. The previously-populated
+      // allRecipesCache + publicRecipes + savedIds are still valid from the
+      // prior visit; no fresh fetch is required just because focus bounced.
+      // See: .planning/quick/260420-s9l-.../260420-s9l-PLAN.md for the full
+      // regression description.
+      if (searchQuery.trim().length > 0) return;
+
       if (activeTab === 'public') {
         loadPublicData();
       } else {
         loadPersonalData();
       }
-    }, [activeTab, loadPublicData, loadPersonalData])
+    }, [activeTab, loadPublicData, loadPersonalData, searchQuery])
   );
 
   // ── Tab switch handler ──
