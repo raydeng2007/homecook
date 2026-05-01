@@ -595,21 +595,17 @@ export default function HouseholdScreen() {
                 onPress={() => Linking.openURL('https://homecook.live/privacy')}
                 className="card flex-row items-center gap-3 py-3 mb-2"
               >
-                <View className="w-9 h-9 rounded-xl bg-primary/15 items-center justify-center">
-                  <Ionicons name="shield-checkmark-outline" size={18} color={primary} />
-                </View>
-                <Text className="text-text-high font-medium text-sm">Privacy Policy</Text>
-                <Ionicons name="open-outline" size={14} color={textDisabled} style={{ marginLeft: 'auto' }} />
+                <Ionicons name="shield-checkmark-outline" size={22} color={primary} />
+                <Text className="text-text-high font-medium text-sm flex-1">Privacy Policy</Text>
+                <Ionicons name="open-outline" size={14} color={textDisabled} />
               </Pressable>
               <Pressable
                 onPress={() => Linking.openURL('https://homecook.live/terms')}
                 className="card flex-row items-center gap-3 py-3"
               >
-                <View className="w-9 h-9 rounded-xl bg-primary/15 items-center justify-center">
-                  <Ionicons name="document-text-outline" size={18} color={primary} />
-                </View>
-                <Text className="text-text-high font-medium text-sm">Terms of Service</Text>
-                <Ionicons name="open-outline" size={14} color={textDisabled} style={{ marginLeft: 'auto' }} />
+                <Ionicons name="document-text-outline" size={22} color={primary} />
+                <Text className="text-text-high font-medium text-sm flex-1">Terms of Service</Text>
+                <Ionicons name="open-outline" size={14} color={textDisabled} />
               </Pressable>
             </View>
 
@@ -622,10 +618,8 @@ export default function HouseholdScreen() {
                 onPress={handleDeleteAccount}
                 className="card flex-row items-center gap-3 py-3"
               >
-                <View className="w-9 h-9 rounded-xl bg-error/15 items-center justify-center">
-                  <Ionicons name="trash-outline" size={18} color={errorColor} />
-                </View>
-                <View>
+                <Ionicons name="trash-outline" size={22} color={errorColor} />
+                <View className="flex-1">
                   <Text className="text-error font-medium text-sm">Delete Account</Text>
                   <Text className="text-text-disabled text-xs">
                     Permanently delete your account and data

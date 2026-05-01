@@ -85,9 +85,9 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
               accessibilityState={{ selected: isFocused }}
               accessibilityLabel={config.label}
             >
-              <Ionicons name={iconName} size={22} color={color} />
+              <Ionicons name={iconName} size={24} color={color} />
               <Text
-                className={`text-[10px] mt-1 font-medium`}
+                className={`text-xs mt-1 font-medium`}
                 style={{ color }}
               >
                 {config.label}

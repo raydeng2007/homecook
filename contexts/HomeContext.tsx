@@ -30,7 +30,10 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      setIsLoading(true);
+      // Only show full-screen loading on initial load (when home is null).
+      // On refresh, skip setting isLoading to prevent the _layout from
+      // unmounting all tabs and defaulting back to the Home tab.
+      if (!home) setIsLoading(true);
       setError(null);
       const userHome = await getOrCreateHome(session.user.id);
       setHome(userHome);
@@ -39,7 +42,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [session?.user?.id]);
+  }, [session?.user?.id, home]);
 
   useEffect(() => {
     loadHome();

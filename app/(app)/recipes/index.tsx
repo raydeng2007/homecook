@@ -239,10 +239,10 @@ export default function CookbookScreen() {
         <Text className="text-xl font-bold text-text-high">Cookbook</Text>
         <Link href="/(app)/recipes/create" asChild>
           <Pressable
-            className="w-10 h-10 items-center justify-center rounded-full bg-primary active:bg-primary-variant"
+            className="w-11 h-11 items-center justify-center rounded-full bg-primary active:bg-primary-variant"
             accessibilityLabel="Create recipe"
           >
-            <Ionicons name="add" size={22} color={onPrimary} />
+            <Ionicons name="add" size={26} color={onPrimary} />
           </Pressable>
         </Link>
       </View>
@@ -324,28 +324,25 @@ export default function CookbookScreen() {
             const showBookmark = activeTab === 'public' || !ownRecipe;
 
             return (
-              <View className="flex-row items-center">
-                <View className="flex-1">
-                  <RecipeDiaryCard
-                    recipe={item}
-                    index={index}
-                    onPress={handleRecipePress}
-                  />
-                </View>
-                {showBookmark ? (
+              <View>
+                <RecipeDiaryCard
+                  recipe={item}
+                  index={index}
+                  onPress={handleRecipePress}
+                />
+                {showBookmark && (
                   <Pressable
                     onPress={() => handleToggleSave(item.id)}
-                    className="w-10 h-10 items-center justify-center ml-1"
+                    className="absolute right-2 top-4 w-9 h-9 items-center justify-center rounded-full"
+                    style={{ backgroundColor: 'rgba(13,12,0,0.5)' }}
                     accessibilityLabel={isSaved ? 'Unsave recipe' : 'Save recipe'}
                   >
                     <Ionicons
                       name={isSaved ? 'bookmark' : 'bookmark-outline'}
-                      size={20}
-                      color={isSaved ? primary : textDisabled}
+                      size={18}
+                      color={isSaved ? primary : 'rgba(250,243,235,0.7)'}
                     />
                   </Pressable>
-                ) : (
-                  <View className="w-10" />
                 )}
               </View>
             );
