@@ -75,7 +75,7 @@ export default function RecipeHeroCard({
           {recipe.calories != null && (
             <>
               <View className="flex-row items-center gap-1">
-                <Ionicons name="flame-outline" size={12} color={primary} />
+                <Ionicons name="flame-outline" size={14} color={primary} />
                 <Text className="text-xs text-text-medium">
                   {recipe.calories} cal
                 </Text>
@@ -84,7 +84,7 @@ export default function RecipeHeroCard({
             </>
           )}
           <View className="flex-row items-center gap-1">
-            <Ionicons name="people-outline" size={12} color={secondary} />
+            <Ionicons name="people-outline" size={14} color={secondary} />
             <Text className="text-xs text-text-medium">
               {recipe.servings} servings
             </Text>

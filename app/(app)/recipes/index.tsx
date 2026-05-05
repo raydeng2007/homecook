@@ -334,13 +334,13 @@ export default function CookbookScreen() {
                   <Pressable
                     onPress={() => handleToggleSave(item.id)}
                     className="absolute right-2 top-4 w-9 h-9 items-center justify-center rounded-full"
-                    style={{ backgroundColor: 'rgba(13,12,0,0.5)' }}
+                    style={{ backgroundColor: 'rgba(13,12,0,0.6)' }}
                     accessibilityLabel={isSaved ? 'Unsave recipe' : 'Save recipe'}
                   >
                     <Ionicons
                       name={isSaved ? 'bookmark' : 'bookmark-outline'}
                       size={18}
-                      color={isSaved ? primary : 'rgba(250,243,235,0.7)'}
+                      color={isSaved ? primary : 'rgba(250,243,235,0.9)'}
                     />
                   </Pressable>
                 )}
