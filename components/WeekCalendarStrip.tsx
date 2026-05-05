@@ -15,17 +15,16 @@ type WeekCalendarStripProps = {
   showNavigation?: boolean;
 };
 
-const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function getWeekDays(baseDate: Date): Date[] {
-  const monday = new Date(baseDate);
-  const day = monday.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  monday.setDate(monday.getDate() + diff);
+  const sunday = new Date(baseDate);
+  const day = sunday.getDay();
+  sunday.setDate(sunday.getDate() - day);
 
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
     return d;
   });
 }

@@ -14,7 +14,7 @@ type MonthCalendarGridProps = {
   markedDates?: Record<string, MarkedDate>;
 };
 
-const DAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+const DAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 function isSameDay(a: Date, b: Date): boolean {
   return (
@@ -32,8 +32,7 @@ function getMonthGrid(year: number, month: number): (Date | null)[][] {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
-  let startDow = firstDay.getDay() - 1;
-  if (startDow < 0) startDow = 6;
+  const startDow = firstDay.getDay(); // 0=Sunday, no conversion needed
 
   const totalDays = lastDay.getDate();
   const weeks: (Date | null)[][] = [];

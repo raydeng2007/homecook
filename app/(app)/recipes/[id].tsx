@@ -231,38 +231,38 @@ export default function RecipeDetailScreen() {
           </Text>
         </View>
 
-        <View className="flex-row gap-2">
+        <View className="flex-row gap-1.5">
           <Pressable
             onPress={handleToggleSave}
-            className="w-10 h-10 items-center justify-center rounded-full bg-surface-3 active:bg-surface-5"
+            className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
             accessibilityLabel={isSaved ? 'Unsave recipe' : 'Save recipe'}
           >
             <Ionicons
               name={isSaved ? 'bookmark' : 'bookmark-outline'}
-              size={16}
+              size={22}
               color={isSaved ? primary : textHigh}
             />
           </Pressable>
           {isOwnRecipe && (
             <Pressable
               onPress={handleEdit}
-              className="w-10 h-10 items-center justify-center rounded-full bg-surface-3 active:bg-surface-5"
+              className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
               accessibilityLabel="Edit recipe"
             >
-              <Ionicons name="pencil" size={16} color={primary} />
+              <Ionicons name="create-outline" size={22} color={primary} />
             </Pressable>
           )}
           {isOwnRecipe && (
             <Pressable
               onPress={handleDelete}
               disabled={isDeleting}
-              className="w-10 h-10 items-center justify-center rounded-full bg-surface-3 active:bg-surface-5"
+              className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
               accessibilityLabel="Delete recipe"
             >
               {isDeleting ? (
                 <ActivityIndicator size="small" color={error} />
               ) : (
-                <Ionicons name="trash" size={16} color={error} />
+                <Ionicons name="trash-outline" size={22} color={error} />
               )}
             </Pressable>
           )}

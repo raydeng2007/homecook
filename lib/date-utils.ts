@@ -19,19 +19,18 @@ export function formatDateKey(date: Date): string {
 }
 
 /**
- * Get the Monday–Sunday range for the week containing baseDate.
+ * Get the Sunday–Saturday range for the week containing baseDate.
  */
 export function getWeekRange(baseDate: Date): { start: Date; end: Date } {
-  const monday = new Date(baseDate);
-  const day = monday.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  monday.setDate(monday.getDate() + diff);
-  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(baseDate);
+  const day = sunday.getDay();
+  sunday.setDate(sunday.getDate() - day);
+  sunday.setHours(0, 0, 0, 0);
 
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+  const saturday = new Date(sunday);
+  saturday.setDate(sunday.getDate() + 6);
 
-  return { start: monday, end: sunday };
+  return { start: sunday, end: saturday };
 }
 
 /**

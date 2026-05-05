@@ -43,49 +43,51 @@ describe('formatDateKey', () => {
 });
 
 // ── getWeekRange ──────────────────────────────────────────────────────────
+// Week runs Sunday–Saturday
 
 describe('getWeekRange', () => {
-  it('returns Monday as start for a Wednesday input', () => {
+  it('returns Sunday as start for a Wednesday input', () => {
     const wednesday = new Date(2024, 0, 17); // Wed Jan 17
     const { start } = getWeekRange(wednesday);
-    expect(formatDateKey(start)).toBe('2024-01-15'); // Mon Jan 15
+    expect(formatDateKey(start)).toBe('2024-01-14'); // Sun Jan 14
   });
 
-  it('returns Sunday as end for a Wednesday input', () => {
+  it('returns Saturday as end for a Wednesday input', () => {
     const wednesday = new Date(2024, 0, 17); // Wed Jan 17
     const { end } = getWeekRange(wednesday);
-    expect(formatDateKey(end)).toBe('2024-01-21'); // Sun Jan 21
+    expect(formatDateKey(end)).toBe('2024-01-20'); // Sat Jan 20
   });
 
-  it('handles Monday input (start of week — returns same Monday)', () => {
-    const monday = new Date(2024, 0, 15); // Mon Jan 15
-    const { start } = getWeekRange(monday);
-    expect(formatDateKey(start)).toBe('2024-01-15');
-  });
-
-  it('handles Sunday input (rolls back to previous Monday)', () => {
-    const sunday = new Date(2024, 0, 21); // Sun Jan 21
+  it('handles Sunday input (start of week — returns same Sunday)', () => {
+    const sunday = new Date(2024, 0, 14); // Sun Jan 14
     const { start } = getWeekRange(sunday);
-    expect(formatDateKey(start)).toBe('2024-01-15'); // Mon Jan 15
+    expect(formatDateKey(start)).toBe('2024-01-14');
   });
 
-  it('handles Saturday input', () => {
+  it('handles Saturday input (end of week — returns previous Sunday)', () => {
     const saturday = new Date(2024, 0, 20); // Sat Jan 20
     const { start, end } = getWeekRange(saturday);
-    expect(formatDateKey(start)).toBe('2024-01-15');
-    expect(formatDateKey(end)).toBe('2024-01-21');
+    expect(formatDateKey(start)).toBe('2024-01-14'); // Sun Jan 14
+    expect(formatDateKey(end)).toBe('2024-01-20');   // Sat Jan 20
   });
 
-  it('start is always a Monday (getDay() === 1)', () => {
+  it('handles Monday input', () => {
+    const monday = new Date(2024, 0, 15); // Mon Jan 15
+    const { start, end } = getWeekRange(monday);
+    expect(formatDateKey(start)).toBe('2024-01-14'); // Sun Jan 14
+    expect(formatDateKey(end)).toBe('2024-01-20');   // Sat Jan 20
+  });
+
+  it('start is always a Sunday (getDay() === 0)', () => {
     const thursday = new Date(2024, 2, 7); // Thu Mar 7
     const { start } = getWeekRange(thursday);
-    expect(start.getDay()).toBe(1);
+    expect(start.getDay()).toBe(0);
   });
 
-  it('end is always a Sunday (getDay() === 0)', () => {
+  it('end is always a Saturday (getDay() === 6)', () => {
     const thursday = new Date(2024, 2, 7); // Thu Mar 7
     const { end } = getWeekRange(thursday);
-    expect(end.getDay()).toBe(0);
+    expect(end.getDay()).toBe(6);
   });
 
   it('end is exactly 6 days after start', () => {
@@ -107,30 +109,30 @@ describe('getWeekRange', () => {
 
 describe('formatWeekLabel', () => {
   it('formats a same-month week range', () => {
-    const start = new Date(2024, 0, 15); // Jan 15
-    const end = new Date(2024, 0, 21);   // Jan 21
+    const start = new Date(2024, 0, 14); // Sun Jan 14
+    const end = new Date(2024, 0, 20);   // Sat Jan 20
     const label = formatWeekLabel(start, end);
-    expect(label).toContain('Jan 15');
-    expect(label).toContain('Jan 21');
+    expect(label).toContain('Jan 14');
+    expect(label).toContain('Jan 20');
   });
 
   it('contains the en-dash separator', () => {
-    const start = new Date(2024, 0, 15);
-    const end = new Date(2024, 0, 21);
+    const start = new Date(2024, 0, 14);
+    const end = new Date(2024, 0, 20);
     expect(formatWeekLabel(start, end)).toContain(' – ');
   });
 
   it('formats a cross-month week range', () => {
-    const start = new Date(2024, 2, 28); // Mar 28
-    const end = new Date(2024, 3, 3);    // Apr 3
+    const start = new Date(2024, 2, 31); // Sun Mar 31
+    const end = new Date(2024, 3, 6);    // Sat Apr 6
     const label = formatWeekLabel(start, end);
     expect(label).toContain('Mar');
     expect(label).toContain('Apr');
   });
 
   it('returns a non-empty string', () => {
-    const start = new Date(2024, 5, 3); // Jun 3
-    const end = new Date(2024, 5, 9);   // Jun 9
+    const start = new Date(2024, 5, 2); // Sun Jun 2
+    const end = new Date(2024, 5, 8);   // Sat Jun 8
     expect(formatWeekLabel(start, end).length).toBeGreaterThan(0);
   });
 });
