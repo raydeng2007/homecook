@@ -592,7 +592,7 @@ export default function HouseholdScreen() {
                 Legal
               </Text>
               <Pressable
-                onPress={() => Linking.openURL('https://homecook.live/privacy')}
+                onPress={() => Linking.openURL('https://homecook.live/privacy.html')}
                 className="card flex-row items-center gap-3 py-3 mb-2"
               >
                 <Ionicons name="shield-checkmark-outline" size={22} color={primary} />
@@ -600,7 +600,7 @@ export default function HouseholdScreen() {
                 <Ionicons name="open-outline" size={14} color={textDisabled} />
               </Pressable>
               <Pressable
-                onPress={() => Linking.openURL('https://homecook.live/terms')}
+                onPress={() => Linking.openURL('https://homecook.live/terms.html')}
                 className="card flex-row items-center gap-3 py-3"
               >
                 <Ionicons name="document-text-outline" size={22} color={primary} />
