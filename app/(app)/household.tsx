@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState, useCallback, useEffect } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHome } from '@/contexts/HomeContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -592,7 +593,7 @@ export default function HouseholdScreen() {
                 Legal
               </Text>
               <Pressable
-                onPress={() => Linking.openURL('https://homecook.live/privacy.html')}
+                onPress={() => WebBrowser.openBrowserAsync('https://homecook.live/privacy.html')}
                 className="card flex-row items-center gap-3 py-3 mb-2"
               >
                 <Ionicons name="shield-checkmark-outline" size={22} color={primary} />
@@ -600,7 +601,7 @@ export default function HouseholdScreen() {
                 <Ionicons name="open-outline" size={14} color={textDisabled} />
               </Pressable>
               <Pressable
-                onPress={() => Linking.openURL('https://homecook.live/terms.html')}
+                onPress={() => WebBrowser.openBrowserAsync('https://homecook.live/terms.html')}
                 className="card flex-row items-center gap-3 py-3"
               >
                 <Ionicons name="document-text-outline" size={22} color={primary} />

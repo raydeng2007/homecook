@@ -2,7 +2,7 @@
   "expo": {
     "name": "HomeCook",
     "slug": "homecook",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "newArchEnabled": true,
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "io.rayray.homecook",
-      "buildNumber": "1",
+      "buildNumber": "3",
       "usesAppleSignIn": true,
       "config": {
         "usesNonExemptEncryption": false

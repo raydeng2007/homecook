@@ -329,3 +329,118 @@ export function pickDisplayName(variants: string[]): string {
 
   return titleCase(best);
 }
+
+// ── Compound ingredient splitter ──────────────────────────────────────
+
+/**
+ * Compound strings like "salt and pepper" or "salt & pepper" that should
+ * be split into separate ingredients. Maps compound → array of replacements.
+ * Each replacement has a name and optional default unit hint.
+ */
+const COMPOUND_SPLITS = new Map<string, { name: string; unit: string }[]>([
+  ['salt and pepper', [
+    { name: 'salt', unit: 'to taste' },
+    { name: 'black pepper', unit: 'to taste' },
+  ]],
+  ['salt & pepper', [
+    { name: 'salt', unit: 'to taste' },
+    { name: 'black pepper', unit: 'to taste' },
+  ]],
+  ['salt and pepper to taste', [
+    { name: 'salt', unit: 'to taste' },
+    { name: 'black pepper', unit: 'to taste' },
+  ]],
+  ['salt and black pepper', [
+    { name: 'salt', unit: 'to taste' },
+    { name: 'black pepper', unit: 'to taste' },
+  ]],
+  ['oil and vinegar', [
+    { name: 'olive oil', unit: '' },
+    { name: 'vinegar', unit: '' },
+  ]],
+]);
+
+/**
+ * Check if a normalized ingredient name is a compound that should be split.
+ * Returns the split parts, or null if not a compound.
+ */
+export function splitCompound(normalizedName: string): { name: string; unit: string }[] | null {
+  return COMPOUND_SPLITS.get(normalizedName) ?? null;
+}
+
+// ── Pantry staples (excluded from shopping lists) ─────────────────────
+
+/**
+ * Common pantry staples that most households already have.
+ * These are excluded from shopping lists by default.
+ * Matched against the NORMALIZED ingredient name.
+ */
+const PANTRY_STAPLES = new Set([
+  'salt',
+  'black pepper',
+  'pepper',
+  'water',
+  'ice',
+  'olive oil',
+  'cooking spray',
+  'nonstick spray',
+  'nonstick cooking spray',
+]);
+
+/**
+ * Check if a normalized ingredient name is a pantry staple
+ * that should be excluded from the shopping list.
+ */
+export function isPantryStaple(normalizedName: string): boolean {
+  return PANTRY_STAPLES.has(normalizedName);
+}
+
+// ── Unit-agnostic key ─────────────────────────────────────────────────
+
+/**
+ * Units that are effectively "count" / unitless and can be merged together.
+ * e.g., "2 large bananas" and "3 bananas" should be the same shopping item.
+ */
+const COUNT_UNITS = new Set([
+  '', 'whole', 'piece', 'large', 'medium', 'small',
+  'count', 'unit', 'clove', 'stalk', 'sprig', 'bunch',
+  'slice', 'head', 'ear', 'leaf', 'link', 'strip',
+]);
+
+/**
+ * Common unit abbreviation variants → canonical form.
+ * Ensures "tablespoons", "tbsp", "Tbsp" all resolve to "tbsp".
+ */
+const UNIT_ALIASES = new Map<string, string>([
+  ['tablespoon', 'tbsp'], ['tablespoons', 'tbsp'], ['tbs', 'tbsp'],
+  ['teaspoon', 'tsp'], ['teaspoons', 'tsp'],
+  ['cup', 'cup'], ['cups', 'cup'],
+  ['ounce', 'oz'], ['ounces', 'oz'],
+  ['pound', 'lb'], ['pounds', 'lb'], ['lbs', 'lb'],
+  ['gram', 'g'], ['grams', 'g'],
+  ['kilogram', 'kg'], ['kilograms', 'kg'],
+  ['milliliter', 'ml'], ['milliliters', 'ml'], ['millilitre', 'ml'],
+  ['liter', 'l'], ['liters', 'l'], ['litre', 'l'],
+  ['pint', 'pt'], ['pints', 'pt'],
+  ['quart', 'qt'], ['quarts', 'qt'],
+  ['gallon', 'gal'], ['gallons', 'gal'],
+  ['pinch', 'pinch'], ['dash', 'dash'],
+  ['handful', 'handful'], ['handfuls', 'handful'],
+]);
+
+/**
+ * Normalize a unit for aggregation key purposes.
+ * Merges count-like units into '' so "2 large banana" and "3 banana"
+ * aggregate together. Normalizes measurement unit aliases so
+ * "tablespoons" and "tbsp" merge. Keeps real measurement units separate.
+ */
+export function normalizeUnitForKey(unit: string): string {
+  const lower = unit.toLowerCase().trim();
+  // Depluralize common unit plurals
+  const singular = lower.endsWith('s') && !lower.endsWith('ss')
+    ? lower.slice(0, -1)
+    : lower;
+  if (COUNT_UNITS.has(lower) || COUNT_UNITS.has(singular)) return '';
+  // Normalize unit aliases (tablespoons → tbsp, etc.)
+  return UNIT_ALIASES.get(lower) ?? UNIT_ALIASES.get(singular) ?? lower;
+}
