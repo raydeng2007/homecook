@@ -1,11 +1,22 @@
-import { View, Text, Pressable, SectionList, ActivityIndicator, RefreshControl, TextInput } from 'react-native';
+import { View, Text, Pressable, SectionList, ActivityIndicator, RefreshControl, TextInput, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useHome } from '@/contexts/HomeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { getMealPlansForRange } from '@/lib/meal-plans';
+import {
+  getShoppingItems,
+  addManualItem,
+  excludeIngredient,
+  renameItem,
+  setItemChecked,
+  removeItem,
+  subscribeToShoppingItems,
+  type ShoppingItem,
+} from '@/lib/shopping-items';
 import {
   guessCategory,
   CATEGORY_LABELS,
@@ -156,30 +167,21 @@ function formatQuantity(qty: number): string {
   return qty.toFixed(1).replace(/\.0$/, '');
 }
 
-// ── Manual item type ──────────────────────────────────────────────────
-
-type ManualItem = {
-  key: string;
-  name: string;
-};
-
-let manualIdCounter = 0;
-
 // ── Component ──────────────────────────────────────────────────────────
 
 export default function ShoppingScreen() {
   const { home } = useHome();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
   const { statusBarStyle, textHigh, textDisabled, onPrimary, primary, error: errorColor } = useThemeColors();
   const [weekOffset, setWeekOffset] = useState(0);
   const [plans, setPlans] = useState<MealPlanWithFullRecipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
-  const lastWeekOffset = useRef(weekOffset);
 
-  // ── Manual items ──
-  const [manualItems, setManualItems] = useState<ManualItem[]>([]);
+  // ── DB-backed shopping items (manual adds + excluded recipe ingredients) ──
+  const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
   const [newItemText, setNewItemText] = useState('');
 
   const { start, end } = useMemo(() => {
@@ -189,6 +191,19 @@ export default function ShoppingScreen() {
   }, [weekOffset]);
 
   const weekLabel = formatWeekLabel(start, end);
+  const weekStartKey = useMemo(() => formatDateKey(start), [start]);
+
+  // Derived: manual items + excluded keys
+  const manualItems = useMemo(
+    () => shoppingItems.filter((i) => i.kind === 'manual'),
+    [shoppingItems]
+  );
+  const excludedKeys = useMemo(
+    () => new Set(shoppingItems.filter((i) => i.kind === 'excluded').map((i) => i.name)),
+    [shoppingItems]
+  );
+
+  // ── Loaders ──
 
   const loadPlans = useCallback(async (silent = false) => {
     if (!home?.id) return;
@@ -196,11 +211,7 @@ export default function ShoppingScreen() {
     try {
       if (!silent) setIsLoading(true);
       setLoadError(null);
-      const data = await getMealPlansForRange(
-        home.id,
-        formatDateKey(start),
-        formatDateKey(end)
-      );
+      const data = await getMealPlansForRange(home.id, formatDateKey(start), formatDateKey(end));
       setPlans(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load shopping list';
@@ -211,31 +222,84 @@ export default function ShoppingScreen() {
     }
   }, [home?.id, start, end]);
 
-  // Reset checked items and manual items when the week changes
+  const loadShoppingItems = useCallback(async () => {
+    if (!home?.id) return;
+    try {
+      const items = await getShoppingItems(home.id, weekStartKey);
+      setShoppingItems(items);
+    } catch (err) {
+      console.warn('Failed to load shopping items', err);
+    }
+  }, [home?.id, weekStartKey]);
+
   useFocusEffect(
     useCallback(() => {
-      if (lastWeekOffset.current !== weekOffset) {
-        setCheckedItems(new Set());
-        setManualItems([]);
-        lastWeekOffset.current = weekOffset;
-      }
       loadPlans();
-    }, [loadPlans, weekOffset])
+      loadShoppingItems();
+    }, [loadPlans, loadShoppingItems])
   );
+
+  // ── Realtime subscription — sync across household members ──
+  useEffect(() => {
+    if (!home?.id) return;
+    const channel = subscribeToShoppingItems(home.id, () => {
+      loadShoppingItems();
+    });
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [home?.id, loadShoppingItems]);
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
     loadPlans(true);
-  }, [loadPlans]);
+    loadShoppingItems();
+  }, [loadPlans, loadShoppingItems]);
 
-  const items = useMemo(() => aggregateIngredients(plans), [plans]);
+  // Filter out excluded ingredients from auto-generated items
+  const items = useMemo(() => {
+    return aggregateIngredients(plans).filter((it) => !excludedKeys.has(it.key));
+  }, [plans, excludedKeys]);
   const sections = useMemo(() => groupByCategory(items), [items]);
 
   const totalCount = items.length + manualItems.length;
-  const checkedCount = checkedItems.size;
 
-  const toggleItem = (key: string) => {
-    setCheckedItems((prev) => {
+  // Recipe ingredients use local checked state (ephemeral, device-local).
+  // Manual items use DB-backed checked state (synced across household).
+  const [recipeChecked, setRecipeChecked] = useState<Set<string>>(new Set());
+  const actualCheckedCount =
+    manualItems.filter((i) => i.checked).length + recipeChecked.size;
+
+  // ── Actions ──
+
+  const handleAddManualItem = async () => {
+    const trimmed = newItemText.trim();
+    if (!trimmed || !home?.id || !userId) return;
+    setNewItemText('');
+    try {
+      await addManualItem(home.id, weekStartKey, trimmed, userId);
+      // Realtime will pick it up; reload as fallback
+      loadShoppingItems();
+    } catch (err) {
+      Alert.alert('Could not add item', err instanceof Error ? err.message : 'Unknown error');
+    }
+  };
+
+  const handleToggleManual = async (item: ShoppingItem) => {
+    // Optimistic update
+    setShoppingItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, checked: !i.checked } : i))
+    );
+    try {
+      await setItemChecked(item.id, !item.checked);
+    } catch {
+      // Revert on error
+      loadShoppingItems();
+    }
+  };
+
+  const handleToggleRecipe = (key: string) => {
+    setRecipeChecked((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
@@ -243,23 +307,79 @@ export default function ShoppingScreen() {
     });
   };
 
-  const clearChecked = () => setCheckedItems(new Set());
-
-  const addManualItem = () => {
-    const trimmed = newItemText.trim();
-    if (!trimmed) return;
-    const key = `manual-${++manualIdCounter}`;
-    setManualItems((prev) => [...prev, { key, name: trimmed }]);
-    setNewItemText('');
+  const handleRemoveManual = async (item: ShoppingItem) => {
+    setShoppingItems((prev) => prev.filter((i) => i.id !== item.id));
+    try {
+      await removeItem(item.id);
+    } catch {
+      loadShoppingItems();
+    }
   };
 
-  const removeManualItem = (key: string) => {
-    setManualItems((prev) => prev.filter((i) => i.key !== key));
-    setCheckedItems((prev) => {
-      const next = new Set(prev);
-      next.delete(key);
-      return next;
-    });
+  const handleEditManual = (item: ShoppingItem) => {
+    Alert.prompt(
+      'Edit Item',
+      'Update the item name',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Save',
+          onPress: async (value?: string) => {
+            const trimmed = value?.trim();
+            if (!trimmed || trimmed === item.name) return;
+            // Optimistic update
+            setShoppingItems((prev) =>
+              prev.map((i) => (i.id === item.id ? { ...i, name: trimmed } : i))
+            );
+            try {
+              await renameItem(item.id, trimmed);
+            } catch {
+              loadShoppingItems();
+            }
+          },
+        },
+      ],
+      'plain-text',
+      item.name
+    );
+  };
+
+  const handleHideRecipeItem = (item: AggregatedItem) => {
+    if (!home?.id || !userId) return;
+    Alert.alert(
+      'Remove from list?',
+      `"${item.name}" will be hidden from this week's shopping list.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await excludeIngredient(home.id, weekStartKey, item.key, userId);
+              loadShoppingItems();
+            } catch (err) {
+              Alert.alert('Could not remove item', err instanceof Error ? err.message : 'Unknown error');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const clearChecked = async () => {
+    // Uncheck local recipe checks
+    setRecipeChecked(new Set());
+    // Uncheck all manual items in DB
+    const toUncheck = manualItems.filter((i) => i.checked);
+    setShoppingItems((prev) => prev.map((i) => (i.checked ? { ...i, checked: false } : i)));
+    for (const item of toUncheck) {
+      try {
+        await setItemChecked(item.id, false);
+      } catch {
+        // Best effort; realtime will reconcile
+      }
+    }
   };
 
   return (
@@ -304,9 +424,9 @@ export default function ShoppingScreen() {
         {totalCount > 0 && (
           <View className="flex-row items-center justify-between mt-3">
             <Text className="text-xs text-text-medium">
-              {checkedCount} of {totalCount} items checked
+              {actualCheckedCount} of {totalCount} items checked
             </Text>
-            {checkedCount > 0 && (
+            {actualCheckedCount > 0 && (
               <Pressable onPress={clearChecked} testID="shopping-reset-btn">
                 <Text className="text-xs text-primary font-medium">Reset</Text>
               </Pressable>
@@ -327,13 +447,13 @@ export default function ShoppingScreen() {
               placeholderTextColor={textDisabled}
               className="flex-1 ml-2 text-text-high text-sm"
               returnKeyType="done"
-              onSubmitEditing={addManualItem}
+              onSubmitEditing={handleAddManualItem}
               testID="shopping-add-input"
             />
           </View>
           {newItemText.trim().length > 0 && (
             <Pressable
-              onPress={addManualItem}
+              onPress={handleAddManualItem}
               className="bg-primary px-4 py-2.5 rounded-xl active:bg-primary-variant"
               testID="shopping-add-btn"
             >
@@ -420,11 +540,12 @@ export default function ShoppingScreen() {
                     </Text>
                   </View>
                   {manualItems.map((item) => {
-                    const checked = checkedItems.has(item.key);
+                    const checked = item.checked;
                     return (
                       <Pressable
-                        key={item.key}
-                        onPress={() => toggleItem(item.key)}
+                        key={item.id}
+                        onPress={() => handleToggleManual(item)}
+                        onLongPress={() => handleEditManual(item)}
                         className={`flex-row items-center py-3 border-b border-border-subtle ${
                           checked ? 'opacity-50' : ''
                         }`}
@@ -444,9 +565,18 @@ export default function ShoppingScreen() {
                           {item.name}
                         </Text>
                         <Pressable
-                          onPress={() => removeManualItem(item.key)}
+                          onPress={() => handleEditManual(item)}
+                          className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
+                          accessibilityLabel={`Edit ${item.name}`}
+                          hitSlop={6}
+                        >
+                          <Ionicons name="pencil" size={14} color={textDisabled} />
+                        </Pressable>
+                        <Pressable
+                          onPress={() => handleRemoveManual(item)}
                           className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
                           accessibilityLabel={`Remove ${item.name}`}
+                          hitSlop={6}
                         >
                           <Ionicons name="close-circle" size={18} color={textDisabled} />
                         </Pressable>
@@ -490,10 +620,11 @@ export default function ShoppingScreen() {
             </View>
           )}
           renderItem={({ item }) => {
-            const checked = checkedItems.has(item.key);
+            const checked = recipeChecked.has(item.key);
             return (
               <Pressable
-                onPress={() => toggleItem(item.key)}
+                onPress={() => handleToggleRecipe(item.key)}
+                onLongPress={() => handleHideRecipeItem(item)}
                 className={`flex-row items-center py-3 border-b border-border-subtle ${
                   checked ? 'opacity-50' : ''
                 }`}
@@ -527,6 +658,16 @@ export default function ShoppingScreen() {
                 }`}>
                   {formatQuantity(item.quantity)}{item.unit ? ` ${item.unit}` : ''}
                 </Text>
+
+                {/* Remove (X) */}
+                <Pressable
+                  onPress={() => handleHideRecipeItem(item)}
+                  className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3 ml-1"
+                  accessibilityLabel={`Remove ${item.name}`}
+                  hitSlop={6}
+                >
+                  <Ionicons name="close-circle-outline" size={18} color={textDisabled} />
+                </Pressable>
               </Pressable>
             );
           }}

@@ -190,7 +190,7 @@ export default function HomeScreen() {
                     }`}
                   >
                     <Text
-                      className="text-xs font-medium w-16"
+                      className="text-xs font-medium w-18 mr-2"
                       style={{ color: mealColor }}
                     >
                       {mealLabel}

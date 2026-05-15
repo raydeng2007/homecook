@@ -1,4 +1,61 @@
 # Homecook
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+Tradeoff: These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+1. Think Before Coding
+Don't assume. Don't hide confusion. Surface tradeoffs.
+
+Before implementing:
+
+State your assumptions explicitly. If uncertain, ask.
+If multiple interpretations exist, present them - don't pick silently.
+If a simpler approach exists, say so. Push back when warranted.
+If something is unclear, stop. Name what's confusing. Ask.
+2. Simplicity First
+Minimum code that solves the problem. Nothing speculative.
+
+No features beyond what was asked.
+No abstractions for single-use code.
+No "flexibility" or "configurability" that wasn't requested.
+No error handling for impossible scenarios.
+If you write 200 lines and it could be 50, rewrite it.
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+3. Surgical Changes
+Touch only what you must. Clean up only your own mess.
+
+When editing existing code:
+
+Don't "improve" adjacent code, comments, or formatting.
+Don't refactor things that aren't broken.
+Match existing style, even if you'd do it differently.
+If you notice unrelated dead code, mention it - don't delete it.
+When your changes create orphans:
+
+Remove imports/variables/functions that YOUR changes made unused.
+Don't remove pre-existing dead code unless asked.
+The test: Every changed line should trace directly to the user's request.
+
+4. Goal-Driven Execution
+Define success criteria. Loop until verified.
+
+Transform tasks into verifiable goals:
+
+"Add validation" → "Write tests for invalid inputs, then make them pass"
+"Fix the bug" → "Write a test that reproduces it, then make it pass"
+"Refactor X" → "Ensure tests pass before and after"
+For multi-step tasks, state a brief plan:
+
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+These guidelines are working if: fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+
+
 
 A meal planning app for households built with Expo and React Native.
 
@@ -92,6 +149,57 @@ npm test                      # Run Jest unit tests (291 tests)
 npx eas build --platform android --profile production  # Android AAB build
 npx eas build --platform ios --profile production      # iOS IPA build
 ```
+
+## App Store Release Checklist
+
+**CRITICAL: Always bump version numbers and metadata before every production build.** Both stores reject uploads with duplicate version identifiers, and forgetting to bump them is the most common reason builds fail to reach users.
+
+### Before any production build — update `app.json`:
+
+| Field | When to bump | Example |
+|-------|-------------|---------|
+| `expo.version` | New user-facing release | `"1.1.0"` → `"1.1.1"` |
+| `expo.ios.buildNumber` | **Every iOS build** (Apple rejects duplicates) | `"3"` → `"4"` |
+| `expo.android.versionCode` | **Every Android build** (Google rejects duplicates) | `1` → `2` |
+
+**Rules:**
+- `version` is the user-visible semver string. Bump per release (patch for fixes, minor for features, major for breaking changes).
+- `buildNumber` (iOS) and `versionCode` (Android) MUST increment on every single build that gets uploaded — even for the same `version`. They cannot be reused.
+- When in doubt, bump all three.
+
+### Pre-release checklist (run BEFORE `eas build`):
+
+1. **Bump version numbers** in `app.json` (see table above)
+2. **Run database migrations** in Supabase SQL Editor if any `scripts/migration-*.sql` are new — do this BEFORE the build reaches users, or queries against new tables will fail
+3. **Update metadata** that's tied to a release:
+   - Privacy manifests (`ios.privacyManifests`) if new iOS APIs are used
+   - Permissions (`ios.infoPlist.NS*UsageDescription`, `android.permissions`) if added
+   - Privacy policy + terms pages at homecook.live if data practices changed
+4. **Type check + tests**: `npx tsc --noEmit && npm test`
+5. **Visual verification** via web preview (per the Workflow section)
+
+### Post-build (in App Store Connect / Play Console):
+
+- **iOS App Store Connect**: Create a new version, fill "What's New in This Version" release notes, attach the new build, submit for review
+- **Google Play Console**: Upload to the appropriate track (Closed Testing / Production), write release notes, roll out
+- **Both stores**: Confirm screenshots, app description, age rating, and content rating still match the new build
+
+### Build & submit commands:
+
+```bash
+nvm use
+npx eas build --platform ios --profile production
+npx eas submit --platform ios --latest
+npx eas build --platform android --profile production
+npx eas submit --platform android --latest
+```
+
+### Regression tests guarding this:
+
+- `__tests__/config/app-config.test.ts` — fails if `versionCode` or `buildNumber` are missing/invalid
+- `__tests__/assets/icon.test.ts` — fails if icon assets regress (e.g., missing safe zone)
+
+Run `npm test` before every release. If a config test fails, the release is not ready to ship.
 
 ## Code Style
 
