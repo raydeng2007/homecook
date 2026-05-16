@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useHome } from '@/contexts/HomeContext';
@@ -39,18 +39,29 @@ export default function HomeScreen() {
 
   const [planError, setPlanError] = useState<string | null>(null);
 
+  // BUG FIX: prior code had no request-token guard. Rapidly tapping
+  // different dates could land responses out of order, displaying meal
+  // plans for the wrong date. Track the latest request and discard stale
+  // responses (and stale loading/error state) when they arrive late.
+  const loadRequestIdRef = useRef(0);
+
   const loadMealPlans = useCallback(async () => {
     if (!home?.id) return;
+    const requestId = ++loadRequestIdRef.current;
     try {
       setIsLoadingPlans(true);
       setPlanError(null);
       const data = await getMealPlansForDate(home.id, dateKey);
+      if (requestId !== loadRequestIdRef.current) return;
       setMealPlans(data);
     } catch (err) {
+      if (requestId !== loadRequestIdRef.current) return;
       const message = err instanceof Error ? err.message : 'Failed to load meal plans';
       setPlanError(message);
     } finally {
-      setIsLoadingPlans(false);
+      if (requestId === loadRequestIdRef.current) {
+        setIsLoadingPlans(false);
+      }
     }
   }, [home?.id, dateKey]);
 

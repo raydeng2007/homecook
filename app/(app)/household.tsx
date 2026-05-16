@@ -470,12 +470,24 @@ export default function HouseholdScreen() {
         }
         renderItem={({ item }) => {
           const isSelf = item.user_id === currentUserId;
-          const displayName = isSelf
-            ? session?.user?.user_metadata?.full_name ?? 'You'
-            : `Member`;
-          const displayEmail = isSelf
-            ? session?.user?.email ?? ''
-            : item.user_id.substring(0, 8) + '...';
+          // BUG FIX: previously non-self members showed literal text "Member"
+          // and a truncated UUID. Now we read full_name + email from the
+          // get_home_members_with_profiles RPC (migration 011). Fall back to
+          // session data for self, or the UUID prefix if neither is available.
+          const fallbackName = isSelf
+            ? session?.user?.user_metadata?.full_name ?? null
+            : null;
+          const fallbackEmail = isSelf ? session?.user?.email ?? '' : '';
+
+          const fullName = item.full_name?.trim() || fallbackName;
+          const email = item.email || fallbackEmail;
+
+          const displayName = fullName
+            ? fullName
+            : email
+              ? email.split('@')[0]
+              : 'Member';
+          const displayEmail = email || (isSelf ? '' : item.user_id.substring(0, 8) + '...');
           const initial = displayName[0]?.toUpperCase() ?? 'M';
 
           return (

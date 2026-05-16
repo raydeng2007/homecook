@@ -61,7 +61,14 @@ function aggregateIngredients(plans: MealPlanWithFullRecipe[]): AggregatedItem[]
     const { recipe } = plan;
     if (!recipe) continue;
 
-    const servingScale = (plan.servings ?? recipe.servings ?? 1) / (recipe.servings || 1);
+    // BUG FIX: previously this used `??` on the left and `||` on the right.
+    // When recipe.servings === 0, the left side returned 0 (?? doesn't catch
+    // zero), the right side fell through to 1, giving 0 / 1 = 0 — silently
+    // zeroing every ingredient in the recipe. Use `||` on both sides so a
+    // zero/missing servings count always falls back to 1 (no scaling).
+    const recipeServings = recipe.servings || 1;
+    const planServings = plan.servings || recipeServings;
+    const servingScale = planServings / recipeServings;
 
     // Prefer server-normalized ingredients when available, fall back to client-side
     const useServerNormalized = !!recipe.normalized_ingredients?.length;
@@ -193,6 +200,17 @@ export default function ShoppingScreen() {
   const weekLabel = formatWeekLabel(start, end);
   const weekStartKey = useMemo(() => formatDateKey(start), [start]);
 
+  // Recipe ingredients use local checked state (ephemeral, device-local).
+  // Manual items use DB-backed checked state (synced across household).
+  const [recipeChecked, setRecipeChecked] = useState<Set<string>>(new Set());
+
+  // BUG FIX: previously recipeChecked was never reset when switching weeks,
+  // so an item checked in week A would appear checked in week B if the keys
+  // happened to match (e.g. "milk||gal" on a recurring weekly meal plan).
+  useEffect(() => {
+    setRecipeChecked(new Set());
+  }, [weekStartKey]);
+
   // Derived: manual items + excluded keys
   const manualItems = useMemo(
     () => shoppingItems.filter((i) => i.kind === 'manual'),
@@ -222,12 +240,21 @@ export default function ShoppingScreen() {
     }
   }, [home?.id, start, end]);
 
+  const [shoppingItemsError, setShoppingItemsError] = useState<string | null>(null);
+
   const loadShoppingItems = useCallback(async () => {
     if (!home?.id) return;
     try {
+      setShoppingItemsError(null);
       const items = await getShoppingItems(home.id, weekStartKey);
       setShoppingItems(items);
     } catch (err) {
+      // BUG FIX: previously errors were swallowed with console.warn, leaving
+      // users with a mysterious empty shopping list when the migration hadn't
+      // been run, RLS blocked the query, or the network failed. Surface the
+      // error so we can diagnose what actually broke.
+      const message = err instanceof Error ? err.message : 'Failed to load shopping items';
+      setShoppingItemsError(message);
       console.warn('Failed to load shopping items', err);
     }
   }, [home?.id, weekStartKey]);
@@ -263,10 +290,6 @@ export default function ShoppingScreen() {
   const sections = useMemo(() => groupByCategory(items), [items]);
 
   const totalCount = items.length + manualItems.length;
-
-  // Recipe ingredients use local checked state (ephemeral, device-local).
-  // Manual items use DB-backed checked state (synced across household).
-  const [recipeChecked, setRecipeChecked] = useState<Set<string>>(new Set());
   const actualCheckedCount =
     manualItems.filter((i) => i.checked).length + recipeChecked.size;
 
@@ -275,9 +298,12 @@ export default function ShoppingScreen() {
   const handleAddManualItem = async () => {
     const trimmed = newItemText.trim();
     if (!trimmed || !home?.id || !userId) return;
-    setNewItemText('');
     try {
       await addManualItem(home.id, weekStartKey, trimmed, userId);
+      // BUG FIX: previously the input was cleared BEFORE the await, so any
+      // network/RLS error wiped the user's typed text with no way to recover.
+      // Only clear after the insert actually succeeds.
+      setNewItemText('');
       // Realtime will pick it up; reload as fallback
       loadShoppingItems();
     } catch (err) {
@@ -462,6 +488,29 @@ export default function ShoppingScreen() {
           )}
         </View>
       </View>
+
+      {/* Shopping items error banner — surfaces RLS/migration/network failures
+          that were previously silently swallowed (BUG D fix). */}
+      {shoppingItemsError && (
+        <View className="mx-5 mb-2 px-3 py-2 rounded-xl bg-error/15 border border-error/30 flex-row items-start gap-2">
+          <Ionicons name="alert-circle" size={16} color={errorColor} />
+          <View className="flex-1">
+            <Text className="text-error text-xs font-semibold">
+              Couldn't sync shared items
+            </Text>
+            <Text className="text-text-medium text-xs mt-0.5" numberOfLines={3}>
+              {shoppingItemsError}
+            </Text>
+          </View>
+          <Pressable
+            onPress={loadShoppingItems}
+            className="px-2 py-1 rounded-lg active:bg-surface-3"
+            testID="shopping-items-retry"
+          >
+            <Text className="text-primary text-xs font-medium">Retry</Text>
+          </Pressable>
+        </View>
+      )}
 
       {/* Content */}
       {isLoading ? (

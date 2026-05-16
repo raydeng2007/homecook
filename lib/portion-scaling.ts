@@ -62,8 +62,14 @@ export function getScaleFactor(baseServings: number, desiredServings: number): n
 /**
  * Scale a single ingredient quantity by a factor.
  * Parses string quantities like "1.5", "2", handles non-numeric gracefully.
+ *
+ * BUG FIX: previously this returned `rawQuantity` directly when parsing failed,
+ * which leaked `undefined` through when ingredients came back from the DB
+ * without a quantity field. Now we coerce to an empty string for the "no
+ * quantity" case, so `quantity` is always a string per the Ingredient type.
  */
-export function scaleQuantity(rawQuantity: string, factor: number): string {
+export function scaleQuantity(rawQuantity: string | null | undefined, factor: number): string {
+  if (rawQuantity == null) return '';
   const parsed = parseFloat(rawQuantity);
   if (isNaN(parsed) || parsed <= 0) return rawQuantity; // "to taste", "pinch", etc.
   return formatQuantity(parsed * factor);

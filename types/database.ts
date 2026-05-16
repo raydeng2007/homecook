@@ -16,6 +16,10 @@ export interface HomeMember {
   user_id: string;
   role: 'owner' | 'member';
   joined_at: string;
+  /** Joined from auth.users via get_home_members_with_profiles RPC (migration 011). */
+  email?: string;
+  /** Joined from auth.users.raw_user_meta_data via migration 011 RPC. */
+  full_name?: string;
 }
 
 export interface Ingredient {

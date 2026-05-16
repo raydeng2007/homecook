@@ -23,17 +23,36 @@ export async function getOrCreateHome(userId: string): Promise<Home> {
 }
 
 /**
- * Get all members of a home with their profile info.
+ * Get all members of a home, joined with auth.users so we can show their
+ * full_name and email (not just a UUID).
+ *
+ * Uses get_home_members_with_profiles RPC (migration 011), which is
+ * SECURITY DEFINER and enforces "caller must be a member of this home".
+ *
+ * Falls back to the bare home_members table query if the RPC doesn't exist
+ * yet (e.g. user hasn't run the migration), so the household tab still
+ * renders names for self while showing "Member" for others.
  */
 export async function getHomeMembers(homeId: string): Promise<HomeMember[]> {
-  const { data, error } = await supabase
-    .from('home_members')
-    .select('*')
-    .eq('home_id', homeId)
-    .order('joined_at', { ascending: true });
+  const rpcResult = await supabase.rpc('get_home_members_with_profiles', {
+    p_home_id: homeId,
+  });
 
-  if (error) throw error;
-  return (data ?? []) as HomeMember[];
+  // 42883 = function does not exist (migration 011 not yet applied)
+  // PGRST202 = function not in schema cache
+  if (rpcResult.error?.code === '42883' || rpcResult.error?.code === 'PGRST202') {
+    const { data, error } = await supabase
+      .from('home_members')
+      .select('*')
+      .eq('home_id', homeId)
+      .order('joined_at', { ascending: true });
+
+    if (error) throw error;
+    return (data ?? []) as HomeMember[];
+  }
+
+  if (rpcResult.error) throw rpcResult.error;
+  return (rpcResult.data ?? []) as HomeMember[];
 }
 
 /**

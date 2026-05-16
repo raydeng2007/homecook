@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { getOrCreateHome } from '@/lib/homes';
 import type { Home } from '@/types/database';
@@ -23,6 +23,13 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Track whether this is the initial load so we don't keep flipping isLoading
+  // on subsequent refreshes (which would unmount the tabs).
+  // BUG FIX: previously `home` was in the deps of `loadHome`, which created
+  // an infinite re-fetch loop — each setHome(userHome) returns a new object
+  // reference, recreates loadHome, retriggers the useEffect, refetches forever.
+  const hasLoadedRef = useRef(false);
+
   const loadHome = useCallback(async () => {
     if (!session?.user?.id) {
       setIsLoading(false);
@@ -30,19 +37,17 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Only show full-screen loading on initial load (when home is null).
-      // On refresh, skip setting isLoading to prevent the _layout from
-      // unmounting all tabs and defaulting back to the Home tab.
-      if (!home) setIsLoading(true);
+      if (!hasLoadedRef.current) setIsLoading(true);
       setError(null);
       const userHome = await getOrCreateHome(session.user.id);
       setHome(userHome);
+      hasLoadedRef.current = true;
     } catch (err) {
       setError('Failed to load household data');
     } finally {
       setIsLoading(false);
     }
-  }, [session?.user?.id, home]);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     loadHome();

@@ -1,6 +1,6 @@
 import { View, Text, Pressable, FlatList, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useHome } from '@/contexts/HomeContext';
@@ -23,16 +23,27 @@ export default function PlannerScreen() {
   const [monthMealPlans, setMonthMealPlans] = useState<MealPlanWithRecipe[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
 
+  // BUG FIX: prior code had no request-token guard. If the user rapidly
+  // changed months, two requests could be in flight. If the older request
+  // resolved AFTER the newer one, the calendar would show stale meal plans
+  // for the wrong month. We use a ref to track the latest request ID and
+  // discard responses that aren't the most recent.
+  const loadRequestIdRef = useRef(0);
+
   const loadPlans = useCallback(async () => {
     if (!home?.id) return;
+    const requestId = ++loadRequestIdRef.current;
     try {
       const plans = await getMealPlansForMonth(
         home.id,
         selectedDate.getFullYear(),
         selectedDate.getMonth()
       );
+      // Drop the response if a newer request has been kicked off.
+      if (requestId !== loadRequestIdRef.current) return;
       setMonthMealPlans(plans);
     } catch (err) {
+      if (requestId !== loadRequestIdRef.current) return;
       Alert.alert('Error', 'Failed to load meal plans. Please try again.');
     }
   }, [home?.id, selectedDate]);

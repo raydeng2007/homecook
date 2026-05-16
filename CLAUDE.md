@@ -167,6 +167,8 @@ npx eas build --platform ios --profile production      # iOS IPA build
 - `buildNumber` (iOS) and `versionCode` (Android) MUST increment on every single build that gets uploaded — even for the same `version`. They cannot be reused.
 - When in doubt, bump all three.
 
+**IMPORTANT — version source:** `eas.json` is configured with `"appVersionSource": "local"`. This means **`app.json` is the literal source of truth** for version, buildNumber, and versionCode. EAS will NOT auto-increment for you. If you forget to bump and try to upload, the store will reject. Do NOT change this back to `"remote"` — that previously caused builds to ship with version `1.2` while the local repo said `1.1.1`, making it impossible to know what was actually shipping.
+
 ### Pre-release checklist (run BEFORE `eas build`):
 
 1. **Bump version numbers** in `app.json` (see table above)

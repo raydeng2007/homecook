@@ -88,6 +88,12 @@ describe('scaleQuantity', () => {
   it('passes through empty string', () => {
     expect(scaleQuantity('', 2)).toBe('');
   });
+  it('returns empty string for undefined input (BUG H regression)', () => {
+    expect(scaleQuantity(undefined as unknown as string, 2)).toBe('');
+  });
+  it('returns empty string for null input (BUG H regression)', () => {
+    expect(scaleQuantity(null as unknown as string, 2)).toBe('');
+  });
   it('scales "2" \u00d7 1.5 \u2192 "3"', () => {
     expect(scaleQuantity('2', 1.5)).toBe('3');
   });
