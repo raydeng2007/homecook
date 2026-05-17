@@ -45,22 +45,35 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  // BUG FIX: Ionicons font was never explicitly loaded. In production builds,
-  // every icon (tab bar, bookmarks, chevrons, search, etc.) rendered as blank
-  // because the font hadn't downloaded before the component mounted. Force-load
-  // the font here and gate rendering until it's ready.
-  const [fontsLoaded] = useFonts({
+  // Load Ionicons font so icons (tab bar, bookmarks, chevrons, search) render
+  // correctly in production. Capture the error so a font load failure doesn't
+  // brick the app — we'd rather render with blank icons for a moment than show
+  // a frozen splash screen forever.
+  const [fontsLoaded, fontError] = useFonts({
     ...Ionicons.font,
   });
 
+  // Hide the splash screen as soon as fonts are loaded OR fail to load.
   useEffect(() => {
-    if (fontsLoaded) {
+    if (fontsLoaded || fontError) {
       SplashScreen.hideAsync().catch(() => {});
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded) return null;
+  // Safety net: force-hide the splash after 3 seconds no matter what.
+  // Protects against any scenario where useFonts hangs in production builds
+  // (asset bundling glitch, native module init issue, etc.) — without this,
+  // a font-load hang would leave users staring at a frozen splash forever.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      SplashScreen.hideAsync().catch(() => {});
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
+  // Render the app even if fonts haven't loaded yet. Icons may briefly render
+  // as blank squares, but the app stays usable. Blocking on fonts caused
+  // production hangs on Android (frozen splash, app unresponsive).
   return (
     <ErrorBoundary>
       <ThemeProvider>

@@ -3,6 +3,164 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 
 Tradeoff: These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
+## ⚠️ ALWAYS BUMP VERSION ON ANY USER-VISIBLE CHANGE ⚠️
+
+**Every time you fix a bug, add a feature, change UI, or modify anything that will ship to users, you MUST update `app.json`:**
+
+| Change type | What to bump |
+|---|---|
+| Bug fix, small UI tweak | `version` patch (1.3.1 → 1.3.2) + `ios.buildNumber` + `android.versionCode` |
+| New feature, multi-bug release | `version` minor (1.3.x → 1.4.0) + `ios.buildNumber` + `android.versionCode` |
+| Major redesign / breaking change | `version` major (1.x.x → 2.0.0) + `ios.buildNumber` + `android.versionCode` |
+| Doc-only change, internal refactor with no shipped diff | Nothing |
+
+**This is non-negotiable for shipped changes.** Both stores reject duplicate `buildNumber`/`versionCode`. Forgetting to bump means:
+- App Store: rejection on upload
+- Play Store: rejection on upload
+- If somehow uploaded with the same version, users **never receive the fix** because their Play Store/App Store treats the update as "no new version"
+
+Do this BEFORE running `npx eas build` — not after. The Right moment to bump is in the same edit pass as the fix.
+
+`eas.json` is locked to `appVersionSource: "local"` — `app.json` is the literal source of truth. Do NOT switch it back to `"remote"`.
+
+## 🛑 MANDATORY: PHYSICALLY RUN THE APP AND WALK THE FLOWS 🛑
+
+**This rule is absolute. No exceptions. No shortcuts. Read this every session.**
+
+Before claiming ANY change is ready to ship, you MUST:
+
+1. **Start the dev server and load the app in a browser preview** (`preview_start` with the `web` config).
+2. **Reload the app fresh** — `window.location.reload()` via `preview_eval`. Confirm it boots to a usable screen, not a frozen splash or error.
+3. **CLICK THROUGH THE ACTUAL FLOW you changed**, end-to-end. Not just visit the screen — interact with it: tap buttons, fill forms, navigate between tabs, hit edge cases. Use `preview_click`, `preview_fill`, `preview_eval` to drive interactions, then `preview_screenshot` to verify the result.
+4. **Take a screenshot at the END of the flow** to prove the change actually works as the user would experience it. Show the screenshot in your reply so the user can sanity check.
+5. **Check the browser console for errors** — `preview_console_logs` with `level: 'error'`. Zero tolerance for new errors introduced by your change.
+
+### What does NOT count as verification
+
+- ❌ "TypeScript compiles" — only catches type errors, not runtime behavior
+- ❌ "Tests pass" — unit tests verify code structure (regex patterns, mocked behavior), NOT the actual app
+- ❌ "I read the code and it looks right" — that's theory, not validation
+- ❌ "The screenshot shows the screen loads" — that's a snapshot, not a flow walk-through
+- ❌ "Web preview won't show this exactly" — then run iOS Simulator (`npx expo run:ios`) or Android Emulator (`npx expo run:android`)
+- ❌ "The user will test it" — they should NOT have to find your bugs
+
+### What DOES count as verification
+
+- ✅ "I added a 'milk' item to the shopping list, took a screenshot showing it appeared with the edit/delete icons visible, then tapped delete and confirmed it removed."
+- ✅ "I cold-started the app from `/`, watched it navigate to `/login`, filled credentials, clicked Sign In, and confirmed it routed to `/(app)`."
+- ✅ "I tapped through all 4 bottom tabs and screenshotted each — all icons render, no console errors."
+- ✅ "I cannot exercise Apple Sign In on web preview because it requires native iOS. Telling the user explicitly so they can test on their device."
+
+### The incident this rule comes from
+
+v1.3.1 shipped with `if (!fontsLoaded) return null;` in `app/_layout.tsx`. TypeScript compiled. 218 tests passed. Web preview showed icons rendering.
+
+**I never actually cold-booted the app after the change.** Had I done so — even just reloading the browser preview — I would have seen the splash hang. Instead I told the user "ready to ship." They built, uploaded to Play Store, installed on Android, and the app showed a frozen black screen. Real users. Real damage.
+
+**Tests verify code. Running the app verifies the app. Both are required.**
+
+### Pre-ship checklist (run every time)
+
+For EVERY change going to production:
+
+- [ ] `npx tsc --noEmit` passes
+- [ ] `npm test` passes
+- [ ] `app.json` version + buildNumber + versionCode bumped
+- [ ] **Preview server is running** and shows current code
+- [ ] **App reloaded fresh** (not just hot-reloaded)
+- [ ] **The specific user-facing flow I changed has been clicked through end-to-end in the preview**
+- [ ] **Screenshot of the working flow attached to my reply**
+- [ ] **`preview_console_logs --level error` returns no new errors**
+- [ ] If change is native-only (won't run in web preview): explicit disclaimer to the user, with concrete steps for them to verify before mass-distribution
+
+If you cannot tick every box, the change is NOT ready. Either complete verification or tell the user exactly what you didn't verify and why.
+
+## 🚨 NEVER SHIP CODE THAT BLOCKS RENDERING 🚨
+
+**Incident that produced this rule (v1.3.1):** I added `if (!fontsLoaded) return null;` to `app/_layout.tsx` to fix the blank Ionicons bug. TypeScript passed, Jest passed, web preview showed icons rendering. I told the user to ship.
+
+**On Android production builds, `useFonts` never resolved.** The app rendered nothing — frozen black screen on cold start. Users uninstalled. Trust damaged.
+
+### Why this happened
+1. Web preview verifies font loading via `document.fonts` API, which is fundamentally different from native `expo-font`'s `useFonts` hook in production builds
+2. TypeScript only checks types, not runtime behavior
+3. Jest tests verify code structure (regex patterns), not actual boot behavior
+4. I assumed "fonts loaded fast on web → will load fast on native"
+5. I introduced a HARD GATE on an async operation with no fallback
+
+### Binding rules — these are non-negotiable
+
+#### Rule 1: No hard gates on async startup operations
+NEVER write code like this in any root-level component:
+```tsx
+if (!someAsyncResult) return null; // ❌ FORBIDDEN if someAsyncResult is async-derived
+```
+If you must wait for something, ALWAYS pair it with a timeout safety net:
+```tsx
+useEffect(() => {
+  const timer = setTimeout(() => forceProceedFn(), 3000); // ✅ Safety net
+  return () => clearTimeout(timer);
+}, []);
+```
+And ALWAYS capture errors:
+```tsx
+const [data, error] = useSomethingAsync(); // ✅ Capture both
+useEffect(() => {
+  if (data || error) hideSplash(); // Both branches unblock the UI
+}, [data, error]);
+```
+
+#### Rule 2: Web preview is NOT sufficient verification for native-only code paths
+Web preview is fine for:
+- UI layout and styling
+- Business logic (forms, validation, state management)
+- Most React component behavior
+
+Web preview is INSUFFICIENT for:
+- Native module integrations (`expo-font`, `expo-camera`, `expo-apple-authentication`, etc.)
+- Splash screen behavior (`expo-splash-screen` is no-op on web)
+- App boot/cold-start timing
+- AsyncStorage timing under stress
+- Native font loading
+- Any code in `Platform.OS === 'ios' | 'android'` branches
+- Push notifications, deep links, native gestures
+
+For any change touching the above, you MUST either:
+- (a) Run on iOS Simulator (`npx expo run:ios`) AND Android Emulator (`npx expo run:android`), OR
+- (b) Explicitly tell the user "I cannot verify this on native — please test on your device before shipping"
+
+NEVER claim "ready to ship" for a native-affecting change without one of those two.
+
+#### Rule 3: Cold-start the app after touching `app/_layout.tsx`
+The root layout runs FIRST on every app launch. A bug here = the entire app is broken. Any edit to `app/_layout.tsx`, `app/(app)/_layout.tsx`, `contexts/AuthContext.tsx`, `contexts/HomeContext.tsx`, or `lib/supabase.ts` REQUIRES a verified cold-start before shipping.
+
+Minimum verification:
+1. Kill the dev server, clear cache: `npx expo start --clear`
+2. Reload the app fresh
+3. Confirm it boots within ~5 seconds to a usable screen
+4. Check console for errors
+
+#### Rule 4: When uncertain, fail OPEN, not CLOSED
+"Fail open": If something goes wrong, the user can still use the app (degraded experience).
+"Fail closed": If something goes wrong, the app refuses to work.
+
+For consumer apps: ALWAYS prefer fail open. A briefly-blank icon is better than a frozen splash. A query that returns stale data is better than a hung loading spinner. A button that maybe doesn't work is better than a button that doesn't exist.
+
+#### Rule 5: Pre-flight checklist for any production-bound change
+
+Before saying "ready to ship":
+- [ ] TypeScript compiles (`npx tsc --noEmit`)
+- [ ] All tests pass (`npm test`)
+- [ ] Version bumped per the rules at the top of this file
+- [ ] If change touches root layout / contexts / supabase: cold-started locally
+- [ ] If change touches native modules: tested on iOS Simulator OR explicitly disclaimed
+- [ ] If change introduces an async gate: paired with a timeout safety net
+- [ ] If risk is non-zero: tell the user what specifically you didn't verify so they can test before mass-distribution
+
+Skipping ANY of these = not ready. "It looks fine" is not verification.
+
+---
+
 1. Think Before Coding
 Don't assume. Don't hide confusion. Surface tradeoffs.
 
@@ -199,9 +357,47 @@ npx eas submit --platform android --latest
 ### Regression tests guarding this:
 
 - `__tests__/config/app-config.test.ts` — fails if `versionCode` or `buildNumber` are missing/invalid
+- `__tests__/config/font-loading.test.ts` — fails if Ionicons font loading is removed from `app/_layout.tsx`
 - `__tests__/assets/icon.test.ts` — fails if icon assets regress (e.g., missing safe zone)
+- `__tests__/platform/*.test.ts` — fails if iOS/Android divergence rules below break
 
 Run `npm test` before every release. If a config test fails, the release is not ready to ship.
+
+## iOS / Android Divergence Rules
+
+The codebase enforces these cross-platform rules through tests in `__tests__/platform/`. Read them before changing anything that branches on `Platform.OS`.
+
+### Where iOS and Android MUST differ
+
+| Concern | iOS | Android | Test |
+|---|---|---|---|
+| Apple Sign In button | Shown | Hidden (Apple SDK is iOS-only) | `apple-sign-in.test.ts` |
+| KeyboardAvoidingView `behavior` | `"padding"` | `"height"` | `keyboard-avoiding.test.ts` |
+| App icon source | `icon.png` | `adaptive-icon.png` + `backgroundColor` | `cross-platform-config.test.ts` |
+| Bundle identifier | `io.rayray.homecook` | `live.homecook.app` | `cross-platform-config.test.ts` |
+| Build number key | `buildNumber` (string) | `versionCode` (int) | `app-config.test.ts` |
+| Privacy manifest | Required (`NSPrivacyAccessedAPITypes`) | N/A | `cross-platform-config.test.ts` |
+| Usage descriptions | `infoPlist.NS*UsageDescription` | `android.permissions[]` | `cross-platform-config.test.ts` |
+
+### Where iOS and Android MUST be identical
+
+| Concern | Rule | Why |
+|---|---|---|
+| External URL handling | Use `WebBrowser.openBrowserAsync`, NEVER `Linking.openURL` for http(s) | Apple rejected a build for session expiration when returning from external Safari |
+| OAuth redirects | Use `makeRedirectUri()` from `expo-auth-session` | It handles platform differences automatically |
+| Status bar | `<StatusBar style={statusBarStyle} />` from `expo-status-bar` | Theme-derived; never hardcoded |
+| Font loading | `useFonts({ ...Ionicons.font })` gated by `if (!fontsLoaded) return null` | Without this, production builds render every icon as a blank circle |
+| Version source | `app.json` is authoritative (`eas.json` set to `appVersionSource: "local"`) | Previously EAS auto-incremented and shipped 1.2 while local repo said 1.1.1 |
+
+### Cross-platform forbidden patterns
+
+These patterns are caught by the platform test suite and will fail CI:
+
+- `Linking.openURL("https://...")` — must be `WebBrowser.openBrowserAsync`
+- `<StatusBar style="dark" />` (hardcoded) — must use `statusBarStyle` from `useThemeColors()`
+- `behavior={Platform.OS === 'android' ? 'padding' : 'height'}` (inverted ternary) — must be `'ios' ? 'padding' : 'height'`
+- Apple Sign In button rendered unconditionally — must be gated by `isAppleSignInAvailable()`
+- Removing `usesAppleSignIn: true` or the `expo-apple-authentication` plugin while keeping the Apple button — App Store rejection bait
 
 ## Code Style
 
