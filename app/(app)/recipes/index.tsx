@@ -333,9 +333,17 @@ export default function CookbookScreen() {
                 {showBookmark && (
                   <Pressable
                     onPress={() => handleToggleSave(item.id)}
-                    className="absolute right-2 top-4 w-9 h-9 items-center justify-center rounded-full"
-                    style={{ backgroundColor: 'rgba(13,12,0,0.6)' }}
+                    // BUG FIX: was `top-4` (fixed 16px from top) — visually
+                    // anchored to top-right corner, not vertically centered.
+                    // Use top: '50%' + transform to center against any card height.
+                    className="absolute right-3 w-9 h-9 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: 'rgba(13,12,0,0.6)',
+                      top: '50%',
+                      transform: [{ translateY: -18 }], // half of h-9 (36px)
+                    }}
                     accessibilityLabel={isSaved ? 'Unsave recipe' : 'Save recipe'}
+                    hitSlop={6}
                   >
                     <Ionicons
                       name={isSaved ? 'bookmark' : 'bookmark-outline'}

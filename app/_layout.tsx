@@ -2,7 +2,6 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import { View } from 'react-native';
 import { useEffect } from 'react';
 import { useFonts } from 'expo-font';
-import { Ionicons } from '@expo/vector-icons';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
@@ -45,12 +44,25 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  // Load Ionicons font so icons (tab bar, bookmarks, chevrons, search) render
-  // correctly in production. Capture the error so a font load failure doesn't
-  // brick the app — we'd rather render with blank icons for a moment than show
-  // a frozen splash screen forever.
+  // Load Ionicons font from LOCAL assets (./assets/fonts/Ionicons.ttf).
+  //
+  // History of this bug: production Android builds shipped with blank icons
+  // even after we added the expo-font config plugin. Root cause: the plugin
+  // was pointed at `./node_modules/.../Ionicons.ttf` and the spread
+  // `{ ...Ionicons.font }` registers the font via require('node_modules/...'),
+  // both of which are unreliable for Metro's asset registry in production
+  // AABs. Asset references must live in the project's own `assets/` tree to
+  // be reliably bundled.
+  //
+  // Fix: copy the .ttf into ./assets/fonts/, point both the plugin (in
+  // app.json) AND useFonts here at that local path. The font is registered
+  // under the EXACT name 'ionicons' (lowercase) — matching what createIconSet
+  // checks via Font.isLoaded('ionicons').
+  //
+  // Capture the error so a font load failure doesn't brick the app — we'd
+  // rather render with blank icons for a moment than show a frozen splash.
   const [fontsLoaded, fontError] = useFonts({
-    ...Ionicons.font,
+    ionicons: require('../assets/fonts/Ionicons.ttf'),
   });
 
   // Hide the splash screen as soon as fonts are loaded OR fail to load.

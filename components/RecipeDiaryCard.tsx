@@ -3,7 +3,6 @@ import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getWarmColor } from '@/lib/recipe-visuals';
 import RecipeImage from '@/components/RecipeImage';
-import { useThemeColors } from '@/hooks/useThemeColors';
 import type { Recipe } from '@/types/database';
 
 type RecipeDiaryCardProps = {
@@ -15,9 +14,7 @@ type RecipeDiaryCardProps = {
 export default function RecipeDiaryCard({
   recipe,
   index,
-  onPress,
 }: RecipeDiaryCardProps) {
-  const { textDisabled } = useThemeColors();
   const cardBg = getWarmColor(index);
 
   return (
@@ -38,8 +35,12 @@ export default function RecipeDiaryCard({
           />
         </View>
 
-        {/* Content */}
-        <View className="flex-1">
+        {/* Content
+            BUG FIX: bookmark overlay (in recipes/index.tsx) sits absolutely
+            positioned over this area. Reserve ~48px of right padding on the
+            title so it truncates BEFORE colliding with the bookmark button
+            instead of disappearing underneath it. */}
+        <View className="flex-1 pr-12">
           <Text className="text-base font-bold text-text-high mb-1" numberOfLines={1}>
             {recipe.title}
           </Text>
@@ -60,9 +61,6 @@ export default function RecipeDiaryCard({
             </View>
           </View>
         </View>
-
-        {/* Arrow */}
-        <Ionicons name="chevron-forward" size={18} color={textDisabled} />
       </Pressable>
     </Link>
   );

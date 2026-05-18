@@ -75,6 +75,19 @@ For EVERY change going to production:
 
 If you cannot tick every box, the change is NOT ready. Either complete verification or tell the user exactly what you didn't verify and why.
 
+### Test credentials for preview verification
+
+To exercise authenticated flows in the web preview (cookbook, shopping, household, etc.), log in with:
+
+| Field | Value |
+|---|---|
+| **Email** | `test@homecook.live` |
+| **Password** | `admin` |
+
+These are test-account credentials provisioned in Supabase for development. Use them with `preview_fill` (or `preview_eval` setting native input values via React's `__reactProps`) to drive the login flow, then `preview_click` your way through the change you're verifying. Take a screenshot at the end of the flow.
+
+Do NOT use a real user's credentials. Do NOT commit other accounts' passwords. If these credentials stop working, regenerate them in Supabase Auth and update this file.
+
 ## 🚨 NEVER SHIP CODE THAT BLOCKS RENDERING 🚨
 
 **Incident that produced this rule (v1.3.1):** I added `if (!fontsLoaded) return null;` to `app/_layout.tsx` to fix the blank Ionicons bug. TypeScript passed, Jest passed, web preview showed icons rendering. I told the user to ship.
