@@ -1,6 +1,6 @@
 import { View, Text, Pressable, Modal, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHome } from '@/contexts/HomeContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -157,7 +157,7 @@ export default function AddMealModal({
             <View className="flex-row gap-2">
               {scaledCal != null && (
                 <View className="flex-row items-center gap-1.5 bg-surface-2 px-3 py-2 rounded-full">
-                  <Ionicons name="flame-outline" size={14} color={primary} />
+                  <Icon name="flame-outline" size={14} color={primary} />
                   <Text className="text-xs text-text-high font-medium">
                     {scaledCal} kcal
                   </Text>
@@ -166,7 +166,7 @@ export default function AddMealModal({
 
               {perServing != null && (
                 <View className="flex-row items-center gap-1.5 bg-surface-2 px-3 py-2 rounded-full">
-                  <Ionicons name="person-outline" size={14} color={secondary} />
+                  <Icon name="person-outline" size={14} color={secondary} />
                   <Text className="text-xs text-text-high font-medium">
                     {perServing}/srv
                   </Text>
@@ -178,7 +178,7 @@ export default function AddMealModal({
           {/* Scaled indicator */}
           {adjustedServings !== selectedRecipe.servings && (
             <View className="flex-row items-center gap-1.5 mt-3">
-              <Ionicons name="information-circle-outline" size={14} color={primary} />
+              <Icon name="information-circle-outline" size={14} color={primary} />
               <Text className="text-xs text-primary">
                 Adjusted from {selectedRecipe.servings} servings
               </Text>
@@ -222,7 +222,7 @@ export default function AddMealModal({
               <ActivityIndicator size="small" color={onPrimary} />
             ) : (
               <>
-                <Ionicons name="add-circle" size={20} color={onPrimary} />
+                <Icon name="add-circle" size={20} color={onPrimary} />
                 <Text className="text-on-primary font-bold text-base ml-2">
                   Add to {selectedMealType}
                 </Text>
@@ -245,7 +245,7 @@ export default function AddMealModal({
         </View>
       ) : recipes.length === 0 ? (
         <View className="flex-1 items-center justify-center">
-          <Ionicons name="book-outline" size={48} color={textDisabled} />
+          <Icon name="book-outline" size={48} color={textDisabled} />
           <Text className="text-text-medium mt-4">No recipes yet</Text>
           <Text className="text-xs text-text-disabled mt-1 text-center px-6">
             Create a recipe or bookmark public recipes first, then plan meals
@@ -277,7 +277,7 @@ export default function AddMealModal({
                   {item.calories ? `${item.calories} cal` : ''}{item.calories && item.servings ? ' · ' : ''}{item.servings} servings
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={textMedium} />
+              <Icon name="chevron-forward" size={18} color={textMedium} />
             </Pressable>
           )}
           contentContainerStyle={{ paddingBottom: 32 }}
@@ -303,7 +303,7 @@ export default function AddMealModal({
                 className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3 mr-1"
                 accessibilityLabel="Back to recipe list"
               >
-                <Ionicons name="arrow-back" size={20} color={textHigh} />
+                <Icon name="arrow-back" size={20} color={textHigh} />
               </Pressable>
             )}
             <View className="flex-1">
@@ -318,7 +318,7 @@ export default function AddMealModal({
             testID="meal-modal-cancel"
             className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
           >
-            <Ionicons name="close" size={24} color={textHigh} />
+            <Icon name="close" size={24} color={textHigh} />
           </Pressable>
         </View>
 

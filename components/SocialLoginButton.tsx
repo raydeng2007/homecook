@@ -1,5 +1,5 @@
 import { Pressable, Text, View, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 
 type SocialProvider = 'google' | 'facebook' | 'email' | 'apple';
@@ -31,7 +31,7 @@ export function SocialLoginButton({ provider, onPress, disabled, testID }: Socia
     >
       <View className="w-8 h-8 items-center justify-center mr-4">
         {ionicon ? (
-          <Ionicons name={ionicon as keyof typeof Ionicons.glyphMap} size={24} color={textHigh} />
+          <Icon name={ionicon as string} size={24} color={textHigh} />
         ) : (
           <Text className="text-xl font-bold text-primary">{icon}</Text>
         )}

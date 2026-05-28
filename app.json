@@ -2,8 +2,8 @@
   "expo": {
     "name": "HomeCook",
     "slug": "homecook",
-    "version": "1.3.5",
-    "newArchEnabled": true,
+    "version": "1.3.9",
+    "newArchEnabled": false,
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "io.rayray.homecook",
-      "buildNumber": "15",
+      "buildNumber": "19",
       "usesAppleSignIn": true,
       "config": {
         "usesNonExemptEncryption": false
@@ -52,7 +52,7 @@
         "backgroundColor": "#121212"
       },
       "package": "live.homecook.app",
-      "versionCode": 15,
+      "versionCode": 19,
       "permissions": [
         "INTERNET"
       ]
@@ -72,14 +72,6 @@
         }
       ],
       "expo-apple-authentication",
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "./assets/fonts/Ionicons.ttf"
-          ]
-        }
-      ],
       [
         "expo-build-properties",
         {

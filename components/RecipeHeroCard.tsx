@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { Link } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import RecipeImage from '@/components/RecipeImage';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { Recipe, MealPlanWithRecipe } from '@/types/database';
@@ -25,7 +25,7 @@ export default function RecipeHeroCard({
   if (!recipe) {
     return (
       <View className="bg-surface-1 rounded-3xl p-6 items-center justify-center h-64">
-        <Ionicons name="restaurant-outline" size={48} color={textDisabled} />
+        <Icon name="restaurant-outline" size={48} color={textDisabled} />
         <Text className="text-text-medium mt-3 text-base">No recipes yet</Text>
         <Text className="text-text-disabled text-sm mt-1">
           Add your first recipe to get started
@@ -75,7 +75,7 @@ export default function RecipeHeroCard({
           {recipe.calories != null && (
             <>
               <View className="flex-row items-center gap-1">
-                <Ionicons name="flame-outline" size={14} color={primary} />
+                <Icon name="flame-outline" size={14} color={primary} />
                 <Text className="text-xs text-text-medium">
                   {recipe.calories} cal
                 </Text>
@@ -84,7 +84,7 @@ export default function RecipeHeroCard({
             </>
           )}
           <View className="flex-row items-center gap-1">
-            <Ionicons name="people-outline" size={14} color={secondary} />
+            <Icon name="people-outline" size={14} color={secondary} />
             <Text className="text-xs text-text-medium">
               {recipe.servings} servings
             </Text>
@@ -97,14 +97,14 @@ export default function RecipeHeroCard({
             onPress={onPressMealPlan}
             className="flex-row items-center gap-1.5 px-4 py-2.5 rounded-full border border-surface-4 active:bg-surface-3"
           >
-            <Ionicons name="calendar-outline" size={14} color={textHigh} />
+            <Icon name="calendar-outline" size={14} color={textHigh} />
             <Text className="text-sm text-text-high">Meal plan</Text>
           </Pressable>
           <Pressable
             onPress={onPressAdd}
             className="flex-row items-center gap-1.5 px-4 py-2.5 rounded-full bg-primary active:bg-primary-variant"
           >
-            <Ionicons name="add" size={16} color={onPrimary} />
+            <Icon name="add" size={16} color={onPrimary} />
             <Text className="text-sm font-semibold text-on-primary">Add</Text>
           </Pressable>
         </View>

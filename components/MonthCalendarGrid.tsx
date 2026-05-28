@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import HexagonShape from '@/components/HexagonShape';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { formatDateKey } from '@/lib/date-utils';
@@ -94,7 +94,7 @@ export default function MonthCalendarGrid({
           className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
           accessibilityLabel="Previous month"
         >
-          <Ionicons name="chevron-back" size={18} color={textHigh} />
+          <Icon name="chevron-back" size={18} color={textHigh} />
         </Pressable>
         <Text className="text-sm text-text-medium font-medium">{monthLabel}</Text>
         <Pressable
@@ -102,7 +102,7 @@ export default function MonthCalendarGrid({
           className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
           accessibilityLabel="Next month"
         >
-          <Ionicons name="chevron-forward" size={18} color={textHigh} />
+          <Icon name="chevron-forward" size={18} color={textHigh} />
         </Pressable>
       </View>
 

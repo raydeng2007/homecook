@@ -2,7 +2,7 @@ import { View, Text, Pressable, FlatList, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useHome } from '@/contexts/HomeContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import WeekCalendarStrip from '@/components/WeekCalendarStrip';
@@ -110,7 +110,7 @@ export default function PlannerScreen() {
           onPress={() => router.back()}
           className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3 mr-2"
         >
-          <Ionicons name="arrow-back" size={22} color={textHigh} />
+          <Icon name="arrow-back" size={22} color={textHigh} />
         </Pressable>
         <Text className="text-xl font-bold text-text-high flex-1">Meal Planner</Text>
       </View>
@@ -130,14 +130,14 @@ export default function PlannerScreen() {
           onPress={goToToday}
           className="flex-row items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-2 active:bg-surface-3"
         >
-          <Ionicons name="calendar-outline" size={14} color={textHigh} />
+          <Icon name="calendar-outline" size={14} color={textHigh} />
           <Text className="text-sm text-text-high">Today</Text>
         </Pressable>
         <Pressable
           onPress={() => setShowAddModal(true)}
           className="flex-row items-center gap-1.5 px-4 py-2.5 rounded-full border border-primary active:bg-surface-3"
         >
-          <Ionicons name="add" size={16} color={primary} />
+          <Icon name="add" size={16} color={primary} />
           <Text className="text-sm text-primary font-medium">Add recipe</Text>
         </Pressable>
       </View>
@@ -157,7 +157,7 @@ export default function PlannerScreen() {
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
         ListEmptyComponent={
           <View className="card items-center py-8">
-            <Ionicons name="restaurant-outline" size={40} color={textDisabled} />
+            <Icon name="restaurant-outline" size={40} color={textDisabled} />
             <Text className="text-text-medium mt-3">No meals planned</Text>
             <Text className="text-xs text-text-disabled mt-1">
               Tap + Add recipe to plan a meal

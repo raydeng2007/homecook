@@ -1,5 +1,5 @@
 import { View, TextInput, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { Ingredient } from '@/types/database';
 
@@ -51,7 +51,7 @@ export default function IngredientRow({
         className="w-9 h-9 items-center justify-center rounded-full active:bg-surface-3"
         accessibilityLabel="Remove ingredient"
       >
-        <Ionicons name="close-circle" size={22} color={error} />
+        <Icon name="close-circle" size={22} color={error} />
       </Pressable>
     </View>
   );

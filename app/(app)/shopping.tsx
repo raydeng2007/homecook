@@ -1,6 +1,6 @@
 import { View, Text, Pressable, SectionList, ActivityIndicator, RefreshControl, TextInput, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useHome } from '@/contexts/HomeContext';
@@ -426,7 +426,7 @@ export default function ShoppingScreen() {
             className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
             accessibilityLabel="Previous week"
           >
-            <Ionicons name="chevron-back" size={18} color={textHigh} />
+            <Icon name="chevron-back" size={18} color={textHigh} />
           </Pressable>
 
           <View className="items-center">
@@ -442,7 +442,7 @@ export default function ShoppingScreen() {
             className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
             accessibilityLabel="Next week"
           >
-            <Ionicons name="chevron-forward" size={18} color={textHigh} />
+            <Icon name="chevron-forward" size={18} color={textHigh} />
           </Pressable>
         </View>
 
@@ -465,7 +465,7 @@ export default function ShoppingScreen() {
       <View className="px-5 pb-2">
         <View className="flex-row items-center gap-2">
           <View className="flex-1 search-bar">
-            <Ionicons name="add-circle-outline" size={16} color={textDisabled} />
+            <Icon name="add-circle-outline" size={16} color={textDisabled} />
             <TextInput
               value={newItemText}
               onChangeText={setNewItemText}
@@ -493,7 +493,7 @@ export default function ShoppingScreen() {
           that were previously silently swallowed (BUG D fix). */}
       {shoppingItemsError && (
         <View className="mx-5 mb-2 px-3 py-2 rounded-xl bg-error/15 border border-error/30 flex-row items-start gap-2">
-          <Ionicons name="alert-circle" size={16} color={errorColor} />
+          <Icon name="alert-circle" size={16} color={errorColor} />
           <View className="flex-1">
             <Text className="text-error text-xs font-semibold">
               Couldn't sync shared items
@@ -520,7 +520,7 @@ export default function ShoppingScreen() {
       ) : loadError ? (
         <View className="flex-1 items-center justify-center px-6">
           <View className="w-20 h-20 rounded-full bg-error/15 items-center justify-center mb-4">
-            <Ionicons name="alert-circle-outline" size={40} color={errorColor} />
+            <Icon name="alert-circle-outline" size={40} color={errorColor} />
           </View>
           <Text className="text-error text-lg text-center">
             Failed to load shopping list
@@ -538,7 +538,7 @@ export default function ShoppingScreen() {
       ) : totalCount === 0 ? (
         <View className="flex-1 items-center justify-center px-6">
           <View className="w-20 h-20 rounded-full bg-surface-2 items-center justify-center mb-4">
-            <Ionicons name="cart-outline" size={40} color={textDisabled} />
+            <Icon name="cart-outline" size={40} color={textDisabled} />
           </View>
           <Text className="text-text-medium text-lg text-center">
             No items this week
@@ -579,7 +579,7 @@ export default function ShoppingScreen() {
                       className="w-7 h-7 rounded-lg items-center justify-center"
                       style={{ backgroundColor: primary + '25' }}
                     >
-                      <Ionicons name="create-outline" size={14} color={primary} />
+                      <Icon name="create-outline" size={14} color={primary} />
                     </View>
                     <Text className="text-sm font-semibold text-primary">
                       Added Items
@@ -604,7 +604,7 @@ export default function ShoppingScreen() {
                             checked ? 'bg-primary border-primary' : 'border-text-disabled'
                           }`}
                         >
-                          {checked && <Ionicons name="checkmark" size={16} color={onPrimary} />}
+                          {checked && <Icon name="checkmark" size={16} color={onPrimary} />}
                         </View>
                         <Text
                           className={`flex-1 text-base ${
@@ -619,7 +619,7 @@ export default function ShoppingScreen() {
                           accessibilityLabel={`Edit ${item.name}`}
                           hitSlop={6}
                         >
-                          <Ionicons name="pencil" size={14} color={textDisabled} />
+                          <Icon name="pencil" size={14} color={textDisabled} />
                         </Pressable>
                         <Pressable
                           onPress={() => handleRemoveManual(item)}
@@ -627,7 +627,7 @@ export default function ShoppingScreen() {
                           accessibilityLabel={`Remove ${item.name}`}
                           hitSlop={6}
                         >
-                          <Ionicons name="close-circle" size={18} color={textDisabled} />
+                          <Icon name="close-circle" size={18} color={textDisabled} />
                         </Pressable>
                       </Pressable>
                     );
@@ -654,8 +654,8 @@ export default function ShoppingScreen() {
                 className="w-7 h-7 rounded-lg items-center justify-center"
                 style={{ backgroundColor: section.color + '25' }}
               >
-                <Ionicons
-                  name={section.icon as keyof typeof Ionicons.glyphMap}
+                <Icon
+                  name={section.icon as string}
                   size={14}
                   color={section.color}
                 />
@@ -684,7 +684,7 @@ export default function ShoppingScreen() {
                     checked ? 'bg-primary border-primary' : 'border-text-disabled'
                   }`}
                 >
-                  {checked && <Ionicons name="checkmark" size={16} color={onPrimary} />}
+                  {checked && <Icon name="checkmark" size={16} color={onPrimary} />}
                 </View>
 
                 {/* Content */}
@@ -715,7 +715,7 @@ export default function ShoppingScreen() {
                   accessibilityLabel={`Remove ${item.name}`}
                   hitSlop={6}
                 >
-                  <Ionicons name="close-circle-outline" size={18} color={textDisabled} />
+                  <Icon name="close-circle-outline" size={18} color={textDisabled} />
                 </Pressable>
               </Pressable>
             );

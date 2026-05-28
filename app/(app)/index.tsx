@@ -2,7 +2,7 @@ import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'rea
 import { StatusBar } from 'expo-status-bar';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useHome } from '@/contexts/HomeContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import MonthCalendarGrid from '@/components/MonthCalendarGrid';
@@ -70,16 +70,27 @@ export default function HomeScreen() {
   }, [loadMealPlans]);
 
   const handleRecipePress = (id: string) => {
-    router.push({ pathname: '/(app)/recipes/[id]', params: { id } });
+    // Stamp origin so the detail screen's Back action returns to Home
+    // instead of popping inside the recipes Stack to the Cookbook list.
+    router.push({ pathname: '/(app)/recipes/[id]', params: { id, from: 'home' } });
   };
 
-  const handleRemoveMeal = async (id: string) => {
-    try {
-      await removeMealPlan(id);
-      loadMealPlans();
-    } catch (err) {
-      Alert.alert('Error', 'Failed to remove meal. Please try again.');
-    }
+  const handleRemoveMeal = (id: string) => {
+    Alert.alert('Remove Meal', 'Remove this meal from your plan?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await removeMealPlan(id);
+            loadMealPlans();
+          } catch (err) {
+            Alert.alert('Error', 'Failed to remove meal. Please try again.');
+          }
+        },
+      },
+    ]);
   };
 
   return (
@@ -158,7 +169,7 @@ export default function HomeScreen() {
               testID="home-add-meal-btn"
               className="flex-row items-center gap-1 active:opacity-70"
             >
-              <Ionicons name="add" size={16} color={primary} />
+              <Icon name="add" size={16} color={primary} />
               <Text className="text-xs text-primary font-medium">Add meal</Text>
             </Pressable>
           </View>
@@ -212,7 +223,19 @@ export default function HomeScreen() {
                     >
                       {plan.recipe?.title ?? 'Unknown recipe'}
                     </Text>
-                    <Ionicons name="chevron-forward" size={14} color={textDisabled} />
+                    {/* Trash button — confirmation Alert + removeMealPlan. Nested
+                        Pressable swallows the row tap so the user doesn't get
+                        navigated into the recipe by accident. */}
+                    <Pressable
+                      onPress={() => handleRemoveMeal(plan.id)}
+                      hitSlop={8}
+                      testID={`home-meal-remove-${plan.id}`}
+                      accessibilityLabel="Remove meal"
+                      className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3 mr-1"
+                    >
+                      <Icon name="trash-outline" size={16} color={textDisabled} />
+                    </Pressable>
+                    <Icon name="chevron-forward" size={14} color={textDisabled} />
                   </Pressable>
                 );
               })}

@@ -1,11 +1,11 @@
 import { View, Pressable, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 type TabConfig = {
-  icon: keyof typeof Ionicons.glyphMap;
-  iconOutline: keyof typeof Ionicons.glyphMap;
+  icon: string;
+  iconOutline: string;
   label: string;
   testID: string;
 };
@@ -85,7 +85,7 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
               accessibilityState={{ selected: isFocused }}
               accessibilityLabel={config.label}
             >
-              <Ionicons name={iconName} size={24} color={color} />
+              <Icon name={iconName} size={24} color={color} />
               <Text
                 className={`text-xs mt-1 font-medium`}
                 style={{ color }}

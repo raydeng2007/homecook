@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import RecipeImage from '@/components/RecipeImage';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { MealPlanWithRecipe } from '@/types/database';
@@ -51,7 +51,7 @@ export default function MealPlanCard({ mealPlan, onDelete }: MealPlanCardProps) 
         className="w-9 h-9 items-center justify-center rounded-full active:bg-surface-3"
         accessibilityLabel="Remove meal"
       >
-        <Ionicons name="close" size={18} color={textDisabled} />
+        <Icon name="close" size={18} color={textDisabled} />
       </Pressable>
     </View>
   );

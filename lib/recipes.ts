@@ -49,9 +49,14 @@ export async function getRecipesPage(
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
+  // Surface recipes with real image_url before emoji-fallback recipes.
+  // Visual food photos drive engagement and look better in App Store
+  // screenshots. `nullsFirst: false` puts NULL image_urls last regardless
+  // of the ascending direction. Secondary sort = created_at desc.
   const { data, error, count } = await supabase
     .from('recipes')
     .select('*', { count: 'exact' })
+    .order('image_url', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: false })
     .range(from, to);
 

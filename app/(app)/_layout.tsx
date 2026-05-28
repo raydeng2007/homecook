@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Tabs } from 'expo-router';
 import { View, ActivityIndicator, Text, Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useRouter } from 'expo-router';
 import CustomTabBar from '@/components/CustomTabBar';
 import OnboardingOverlay from '@/components/OnboardingOverlay';
@@ -57,7 +57,7 @@ function AppTabs() {
     return (
       <View className="screen items-center justify-center px-6">
         <View className="w-20 h-20 rounded-full bg-error/15 items-center justify-center mb-4">
-          <Ionicons name="cloud-offline-outline" size={36} color={errorColor} />
+          <Icon name="cloud-offline-outline" size={36} color={errorColor} />
         </View>
         <Text className="text-error text-lg text-center">{error}</Text>
         <Text className="text-text-medium text-sm mt-2 text-center">

@@ -3,7 +3,7 @@ import {
   ActivityIndicator, Share, RefreshControl,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useState, useCallback, useEffect } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
@@ -306,7 +306,7 @@ export default function HouseholdScreen() {
           onPress={handleSignOut}
           className="flex-row items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-3 active:bg-surface-5"
         >
-          <Ionicons name="log-out-outline" size={14} color={textMedium} />
+          <Icon name="log-out-outline" size={14} color={textMedium} />
           <Text className="text-sm text-text-medium">Sign Out</Text>
         </Pressable>
       </View>
@@ -331,7 +331,7 @@ export default function HouseholdScreen() {
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-3 flex-1">
                     <View className="w-11 h-11 rounded-xl bg-primary/20 items-center justify-center">
-                      <Ionicons name="home" size={20} color={primary} />
+                      <Icon name="home" size={20} color={primary} />
                     </View>
                     {isEditingName ? (
                       <View className="flex-1 flex-row items-center gap-2">
@@ -371,7 +371,7 @@ export default function HouseholdScreen() {
                       onPress={() => setIsEditingName(true)}
                       className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
                     >
-                      <Ionicons name="pencil" size={16} color={textMedium} />
+                      <Icon name="pencil" size={16} color={textMedium} />
                     </Pressable>
                   )}
                 </View>
@@ -382,7 +382,7 @@ export default function HouseholdScreen() {
             <View className="px-5 pt-4">
               <View className="card">
                 <View className="flex-row items-center gap-2 mb-3">
-                  <Ionicons name="key-outline" size={16} color={primary} />
+                  <Icon name="key-outline" size={16} color={primary} />
                   <Text className="text-text-medium text-xs font-medium uppercase tracking-wider">
                     Invite Code
                   </Text>
@@ -413,7 +413,7 @@ export default function HouseholdScreen() {
                     onPress={handleCopyCode}
                     className="flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary active:bg-primary-variant"
                   >
-                    <Ionicons
+                    <Icon
                       name={codeCopied ? 'checkmark' : 'copy-outline'}
                       size={16}
                       color={onPrimary}
@@ -427,7 +427,7 @@ export default function HouseholdScreen() {
                     onPress={handleShareCode}
                     className="flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-xl bg-surface-3 active:bg-surface-5"
                   >
-                    <Ionicons name="share-outline" size={16} color={textHigh} />
+                    <Icon name="share-outline" size={16} color={textHigh} />
                     <Text className="text-text-high font-semibold text-sm">Share</Text>
                   </Pressable>
                 </View>
@@ -453,7 +453,7 @@ export default function HouseholdScreen() {
                 onPress={() => setShowJoinModal(true)}
                 className="card flex-row items-center justify-center gap-2 py-3"
               >
-                <Ionicons name="enter-outline" size={18} color={primary} />
+                <Icon name="enter-outline" size={18} color={primary} />
                 <Text className="text-primary font-medium text-sm">
                   Join a Different Household
                 </Text>
@@ -542,7 +542,7 @@ export default function HouseholdScreen() {
                     onPress={() => handleRemoveMember(item)}
                     className="ml-2 w-8 h-8 items-center justify-center rounded-full active:bg-error/20"
                   >
-                    <Ionicons name="close-circle-outline" size={18} color={errorColor} />
+                    <Icon name="close-circle-outline" size={18} color={errorColor} />
                   </Pressable>
                 )}
               </View>
@@ -558,7 +558,7 @@ export default function HouseholdScreen() {
                   onPress={handleLeaveHome}
                   className="card flex-row items-center justify-center gap-2 py-3"
                 >
-                  <Ionicons name="exit-outline" size={18} color={errorColor} />
+                  <Icon name="exit-outline" size={18} color={errorColor} />
                   <Text className="text-error font-medium text-sm">
                     Leave Household
                   </Text>
@@ -576,7 +576,7 @@ export default function HouseholdScreen() {
               <View className="card flex-row items-center justify-between">
                 <View className="flex-row items-center gap-3">
                   <View className="w-9 h-9 rounded-xl bg-surface-3 items-center justify-center">
-                    <Ionicons
+                    <Icon
                       name={isDark ? 'moon' : 'sunny'}
                       size={18}
                       color={primary}
@@ -608,17 +608,17 @@ export default function HouseholdScreen() {
                 onPress={() => WebBrowser.openBrowserAsync('https://homecook.live/privacy.html')}
                 className="card flex-row items-center gap-3 py-3 mb-2"
               >
-                <Ionicons name="shield-checkmark-outline" size={22} color={primary} />
+                <Icon name="shield-checkmark-outline" size={22} color={primary} />
                 <Text className="text-text-high font-medium text-sm flex-1">Privacy Policy</Text>
-                <Ionicons name="open-outline" size={14} color={textDisabled} />
+                <Icon name="open-outline" size={14} color={textDisabled} />
               </Pressable>
               <Pressable
                 onPress={() => WebBrowser.openBrowserAsync('https://homecook.live/terms.html')}
                 className="card flex-row items-center gap-3 py-3"
               >
-                <Ionicons name="document-text-outline" size={22} color={primary} />
+                <Icon name="document-text-outline" size={22} color={primary} />
                 <Text className="text-text-high font-medium text-sm flex-1">Terms of Service</Text>
-                <Ionicons name="open-outline" size={14} color={textDisabled} />
+                <Icon name="open-outline" size={14} color={textDisabled} />
               </Pressable>
             </View>
 
@@ -631,7 +631,7 @@ export default function HouseholdScreen() {
                 onPress={handleDeleteAccount}
                 className="card flex-row items-center gap-3 py-3"
               >
-                <Ionicons name="trash-outline" size={22} color={errorColor} />
+                <Icon name="trash-outline" size={22} color={errorColor} />
                 <View className="flex-1">
                   <Text className="text-error font-medium text-sm">Delete Account</Text>
                   <Text className="text-text-disabled text-xs">
@@ -670,7 +670,7 @@ export default function HouseholdScreen() {
               }}
               className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
             >
-              <Ionicons name="close" size={24} color={textHigh} />
+              <Icon name="close" size={24} color={textHigh} />
             </Pressable>
           </View>
 
@@ -678,7 +678,7 @@ export default function HouseholdScreen() {
             {/* Illustration */}
             <View className="items-center mb-6">
               <View className="w-20 h-20 rounded-full bg-primary/15 items-center justify-center mb-4">
-                <Ionicons name="people" size={36} color={primary} />
+                <Icon name="people" size={36} color={primary} />
               </View>
               <Text className="text-text-high text-base font-medium text-center">
                 Enter an invite code to join
@@ -711,14 +711,14 @@ export default function HouseholdScreen() {
             {/* Error message */}
             {joinError ? (
               <View className="flex-row items-center gap-2 mb-4 px-1">
-                <Ionicons name="alert-circle" size={16} color={errorColor} />
+                <Icon name="alert-circle" size={16} color={errorColor} />
                 <Text className="text-error text-sm flex-1">{joinError}</Text>
               </View>
             ) : null}
 
             {/* Warning */}
             <View className="flex-row items-start gap-2 mb-6 px-1">
-              <Ionicons name="information-circle-outline" size={16} color={textMedium} />
+              <Icon name="information-circle-outline" size={16} color={textMedium} />
               <Text className="text-text-medium text-xs flex-1">
                 Joining a new household will move you from your current one. Your personal bookmarked recipes will stay with you.
               </Text>
@@ -736,7 +736,7 @@ export default function HouseholdScreen() {
                 <ActivityIndicator size="small" color={onPrimary} />
               ) : (
                 <>
-                  <Ionicons
+                  <Icon
                     name="enter-outline"
                     size={20}
                     color={joinCode.length >= 9 ? onPrimary : textMedium}

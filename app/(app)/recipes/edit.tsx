@@ -2,7 +2,7 @@ import { View, Text, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useCallback } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { getRecipe, updateRecipe } from '@/lib/recipes';
 import RecipeForm from '@/components/RecipeForm';
@@ -59,7 +59,7 @@ export default function EditRecipeScreen() {
   if (!recipe) {
     return (
       <View className="screen items-center justify-center px-6">
-        <Ionicons name="alert-circle-outline" size={48} color={errorColor} />
+        <Icon name="alert-circle-outline" size={48} color={errorColor} />
         <Text className="text-error mt-4">Recipe not found</Text>
         <Pressable
           onPress={() => router.back()}
@@ -82,7 +82,7 @@ export default function EditRecipeScreen() {
           className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
           accessibilityLabel="Go back"
         >
-          <Ionicons name="arrow-back" size={24} color={textHigh} />
+          <Icon name="arrow-back" size={24} color={textHigh} />
         </Pressable>
         <Text className="heading-2">Edit Recipe</Text>
       </View>

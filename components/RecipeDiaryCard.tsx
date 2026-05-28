@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { Link } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { getWarmColor } from '@/lib/recipe-visuals';
 import RecipeImage from '@/components/RecipeImage';
 import type { Recipe } from '@/types/database';
@@ -47,14 +47,14 @@ export default function RecipeDiaryCard({
           <View className="flex-row items-center gap-3">
             {recipe.calories != null && (
               <View className="flex-row items-center gap-1">
-                <Ionicons name="flame-outline" size={14} color={cardBg} />
+                <Icon name="flame-outline" size={14} color={cardBg} />
                 <Text className="text-xs" style={{ color: cardBg }}>
                   {recipe.calories} cal
                 </Text>
               </View>
             )}
             <View className="flex-row items-center gap-1">
-              <Ionicons name="people-outline" size={14} color={cardBg} />
+              <Icon name="people-outline" size={14} color={cardBg} />
               <Text className="text-xs" style={{ color: cardBg }}>
                 {recipe.servings} servings
               </Text>

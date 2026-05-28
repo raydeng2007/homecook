@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 
 // ── Step definitions ──────────────────────────────────────────────────
 
 type OnboardingStep = {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: string;
   title: string;
   description: string;
   tab: string; // route name to navigate to
@@ -128,7 +128,7 @@ export default function OnboardingOverlay({ onComplete, navigateToTab }: Onboard
             className="w-10 h-10 rounded-xl items-center justify-center mt-0.5"
             style={{ backgroundColor: primary + '20' }}
           >
-            <Ionicons name={step.icon} size={20} color={primary} />
+            <Icon name={step.icon} size={20} color={primary} />
           </View>
           <View className="flex-1">
             <Text className="text-base font-bold text-text-high mb-1">

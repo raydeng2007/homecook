@@ -2,7 +2,7 @@ import { View, Text, Pressable, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHome } from '@/contexts/HomeContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -46,7 +46,7 @@ export default function CreateRecipeScreen() {
           className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
           accessibilityLabel="Go back"
         >
-          <Ionicons name="arrow-back" size={24} color={textHigh} />
+          <Icon name="arrow-back" size={24} color={textHigh} />
         </Pressable>
         <Text className="heading-2">New Recipe</Text>
       </View>

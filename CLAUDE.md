@@ -59,6 +59,30 @@ v1.3.1 shipped with `if (!fontsLoaded) return null;` in `app/_layout.tsx`. TypeS
 
 **Tests verify code. Running the app verifies the app. Both are required.**
 
+### Second incident (v1.3.0 → v1.3.4 icon-loading saga)
+
+The Ionicons font failed to load on Android production builds. I shipped FOUR consecutive "fixes" that all failed because I never did root-cause analysis. The actual cause — Metro doesn't bundle `require('./node_modules/.../font.ttf')` paths into production AABs — was hiding behind several layers of symptoms. The correct fix was to copy the font into `./assets/fonts/` and reference the local path.
+
+What I did wrong, in order:
+1. **Web preview ≠ production proof.** Web uses `document.fonts` + HTTP fetches. Native uses Metro's asset registry. Same code, completely different loading systems. I treated "icons render in web preview" as "icons will render on Android." They won't.
+2. **I never read the failing component's source code** (`@expo/vector-icons/createIconSet.js`) until the 5th attempt. The file is 50 lines and explained the entire bug: it gates rendering on `Font.isLoaded('ionicons')` and renders empty `<Text/>` when false.
+3. **I treated symptoms, not causes.** Each fix patched a layer above the real problem. After v1.3.0 failed I should have stopped and asked "WHY did useFonts not actually load the font in production?" Instead I added more layers (gate, timeout, plugin) without understanding what was broken at the bottom.
+4. **I rationalized weak evidence as success.** TypeScript passes ≠ runtime correct. Tests pass ≠ production works. Web preview works ≠ native works. I knew these distinctions intellectually but ignored them under pressure to ship.
+
+### Binding rules from this incident
+
+#### Rule 6: When a fix fails in production, STOP and read the failing module's source
+Do NOT ship another guess. Open the actual code that's misbehaving in `node_modules/` (or wherever) and trace the failure path. 50 lines of source reading saves 5 failed releases.
+
+#### Rule 7: Asset paths must live INSIDE the project tree
+Any `require('...')` of a font, image, or other asset MUST resolve to a file inside `./assets/`, `./app/`, `./components/`, etc. NEVER `./node_modules/.../asset.ttf` or similar. Metro production bundling for AAB/IPA is not reliable for cross-package asset paths.
+
+#### Rule 8: Web preview is not a substitute for native verification when the failing code is native-only
+If the bug is on Android/iOS and the relevant code path uses Metro asset registry, expo-font, native modules, or anything below the React Native bridge — **web preview cannot verify the fix**. State this explicitly to the user. Do not claim "verified" based on web alone.
+
+#### Rule 9: After two failed attempts at the same bug, switch from "add another layer" to "remove all layers and start over with research"
+If your first fix didn't work AND your second fix didn't work, you're treating symptoms. Stop. Open the source. Reproduce the EXACT failure conditions. Write a minimal repro. Don't ship anything until you can explain the bug at the bytecode/asset/native layer.
+
 ### Pre-ship checklist (run every time)
 
 For EVERY change going to production:

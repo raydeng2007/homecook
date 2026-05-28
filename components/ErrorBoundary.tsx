@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 
 type Props = {
   children: React.ReactNode;
@@ -58,7 +58,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
               marginBottom: 24,
             }}
           >
-            <Ionicons name="warning-outline" size={36} color="#E07A5F" />
+            <Icon name="warning-outline" size={36} color="#E07A5F" />
           </View>
 
           <Text

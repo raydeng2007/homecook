@@ -2,12 +2,13 @@ import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'rea
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { getRecipe, deleteRecipe } from '@/lib/recipes';
 import { getSavedRecipeIds, saveRecipe, unsaveRecipe } from '@/lib/saved-recipes';
 import { scaleIngredients, scaleCalories, caloriesPerServing, formatQuantity } from '@/lib/portion-scaling';
+import { resolveBackTarget, type RecipeOrigin } from '@/lib/recipe-nav';
 import RecipeImage from '@/components/RecipeImage';
 import ServingStepper from '@/components/ServingStepper';
 import type { Recipe } from '@/types/database';
@@ -73,7 +74,20 @@ export default function RecipeDetailScreen() {
   const { session } = useAuth();
   const { statusBarStyle, textHigh, textMedium, primary, secondary, error } = useThemeColors();
   const userId = session?.user?.id;
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, from } = useLocalSearchParams<{ id: string; from?: RecipeOrigin }>();
+
+  // BUG FIX: a recipe pushed from the Home / Calendar tab used to land on
+  // the Cookbook list after the user tapped Back, because expo-router was
+  // popping inside the recipes Stack. We now pass `from` as a route param
+  // and route the back action to the correct origin.
+  const handleBack = useCallback(() => {
+    const target = resolveBackTarget(from);
+    if (target.kind === 'navigate') {
+      router.navigate(target.href);
+    } else {
+      router.back();
+    }
+  }, [from, router]);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -154,7 +168,7 @@ export default function RecipeDetailScreen() {
             try {
               setIsDeleting(true);
               await deleteRecipe(id);
-              router.back();
+              handleBack();
             } catch (err) {
               Alert.alert('Error', 'Failed to delete recipe');
               setIsDeleting(false);
@@ -185,7 +199,7 @@ export default function RecipeDetailScreen() {
   if (!recipe) {
     return (
       <View className="screen items-center justify-center px-6">
-        <Ionicons name="alert-circle-outline" size={48} color={error} />
+        <Icon name="alert-circle-outline" size={48} color={error} />
         <Text className="text-error mt-4">{loadError ? 'Failed to load recipe' : 'Recipe not found'}</Text>
         {loadError && (
           <Text className="text-text-disabled text-sm mt-1 text-center">{loadError}</Text>
@@ -200,7 +214,7 @@ export default function RecipeDetailScreen() {
             </Pressable>
           )}
           <Pressable
-            onPress={() => router.back()}
+            onPress={handleBack}
             className="px-4 py-2 rounded-lg bg-surface-3"
           >
             <Text className="text-text-medium">Go back</Text>
@@ -220,11 +234,11 @@ export default function RecipeDetailScreen() {
       <View className="px-5 pt-14 pb-3 bg-surface-1 flex-row items-center justify-between">
         <View className="flex-row items-center gap-3 flex-1">
           <Pressable
-            onPress={() => router.back()}
+            onPress={handleBack}
             className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
             accessibilityLabel="Go back"
           >
-            <Ionicons name="arrow-back" size={22} color={textHigh} />
+            <Icon name="arrow-back" size={22} color={textHigh} />
           </Pressable>
           <Text className="text-lg font-bold text-text-high flex-1" numberOfLines={1}>
             {recipe.title}
@@ -237,7 +251,7 @@ export default function RecipeDetailScreen() {
             className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
             accessibilityLabel={isSaved ? 'Unsave recipe' : 'Save recipe'}
           >
-            <Ionicons
+            <Icon
               name={isSaved ? 'bookmark' : 'bookmark-outline'}
               size={22}
               color={isSaved ? primary : textHigh}
@@ -249,7 +263,7 @@ export default function RecipeDetailScreen() {
               className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-3"
               accessibilityLabel="Edit recipe"
             >
-              <Ionicons name="create-outline" size={22} color={primary} />
+              <Icon name="create-outline" size={22} color={primary} />
             </Pressable>
           )}
           {isOwnRecipe && (
@@ -262,7 +276,7 @@ export default function RecipeDetailScreen() {
               {isDeleting ? (
                 <ActivityIndicator size="small" color={error} />
               ) : (
-                <Ionicons name="trash-outline" size={22} color={error} />
+                <Icon name="trash-outline" size={22} color={error} />
               )}
             </Pressable>
           )}
@@ -306,7 +320,7 @@ export default function RecipeDetailScreen() {
             <View className="flex-1 flex-row gap-2 flex-wrap">
               {scaledCalories != null && (
                 <View className="flex-row items-center gap-1.5 bg-surface-2 px-3 py-2 rounded-full">
-                  <Ionicons name="flame-outline" size={14} color={primary} />
+                  <Icon name="flame-outline" size={14} color={primary} />
                   <Text className="text-xs text-text-high font-medium">
                     {scaledCalories} kcal
                   </Text>
@@ -315,7 +329,7 @@ export default function RecipeDetailScreen() {
 
               {perServingCal != null && (
                 <View className="flex-row items-center gap-1.5 bg-surface-2 px-3 py-2 rounded-full">
-                  <Ionicons name="person-outline" size={14} color={secondary} />
+                  <Icon name="person-outline" size={14} color={secondary} />
                   <Text className="text-xs text-text-high font-medium">
                     {perServingCal}/serving
                   </Text>
@@ -330,7 +344,7 @@ export default function RecipeDetailScreen() {
               onPress={handleResetServings}
               className="flex-row items-center gap-1.5 mt-2"
             >
-              <Ionicons name="information-circle-outline" size={14} color={primary} />
+              <Icon name="information-circle-outline" size={14} color={primary} />
               <Text className="text-xs text-primary">
                 Scaled from {recipe.servings} servings
               </Text>

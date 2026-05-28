@@ -1,7 +1,7 @@
 import { View, Text, FlatList, Pressable, ActivityIndicator, TextInput } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Link, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useState, useCallback, useMemo } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
@@ -220,7 +220,9 @@ export default function CookbookScreen() {
   }, [activeTab, publicRecipes, personalRecipes, allRecipesCache, searchQuery, isSearching]);
 
   const handleRecipePress = (id: string) => {
-    router.push({ pathname: '/(app)/recipes/[id]', params: { id } });
+    // Explicit origin so the detail screen's Back action pops within
+    // the recipes Stack (back to this Cookbook list).
+    router.push({ pathname: '/(app)/recipes/[id]', params: { id, from: 'recipes' } });
   };
 
   const headerCount = isSearching
@@ -242,7 +244,7 @@ export default function CookbookScreen() {
             className="w-11 h-11 items-center justify-center rounded-full bg-primary active:bg-primary-variant"
             accessibilityLabel="Create recipe"
           >
-            <Ionicons name="add" size={26} color={onPrimary} />
+            <Icon name="add" size={26} color={onPrimary} />
           </Pressable>
         </Link>
       </View>
@@ -284,7 +286,7 @@ export default function CookbookScreen() {
       {/* Search bar */}
       <View className="px-5 pb-2">
         <View className="search-bar">
-          <Ionicons name="search-outline" size={16} color={textDisabled} />
+          <Icon name="search-outline" size={16} color={textDisabled} />
           <TextInput
             value={searchQuery}
             onChangeText={handleSearchChange}
@@ -300,7 +302,7 @@ export default function CookbookScreen() {
           />
           {searchQuery.length > 0 && (
             <Pressable onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={16} color={textDisabled} />
+              <Icon name="close-circle" size={16} color={textDisabled} />
             </Pressable>
           )}
         </View>
@@ -345,7 +347,7 @@ export default function CookbookScreen() {
                     accessibilityLabel={isSaved ? 'Unsave recipe' : 'Save recipe'}
                     hitSlop={6}
                   >
-                    <Ionicons
+                    <Icon
                       name={isSaved ? 'bookmark' : 'bookmark-outline'}
                       size={18}
                       color={isSaved ? primary : 'rgba(250,243,235,0.9)'}
@@ -383,7 +385,7 @@ export default function CookbookScreen() {
           }
           ListEmptyComponent={
             <View className="items-center py-10">
-              <Ionicons
+              <Icon
                 name={
                   loadError
                     ? 'alert-circle-outline'

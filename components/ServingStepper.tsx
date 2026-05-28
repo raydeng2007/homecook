@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 
 type ServingStepperProps = {
@@ -45,7 +45,7 @@ export default function ServingStepper({
           }`}
           accessibilityLabel="Decrease servings"
         >
-          <Ionicons
+          <Icon
             name="remove"
             size={14}
             color={canDecrement ? textHigh : textDisabled}
@@ -64,7 +64,7 @@ export default function ServingStepper({
           }`}
           accessibilityLabel="Increase servings"
         >
-          <Ionicons
+          <Icon
             name="add"
             size={14}
             color={canIncrement ? onPrimary : textDisabled}
@@ -85,7 +85,7 @@ export default function ServingStepper({
         }`}
         accessibilityLabel="Decrease servings"
       >
-        <Ionicons
+        <Icon
           name="remove"
           size={16}
           color={canDecrement ? textHigh : textDisabled}
@@ -105,7 +105,7 @@ export default function ServingStepper({
         }`}
         accessibilityLabel="Increase servings"
       >
-        <Ionicons
+        <Icon
           name="add"
           size={16}
           color={canIncrement ? onPrimary : textDisabled}

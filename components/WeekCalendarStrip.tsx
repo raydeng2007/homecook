@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import HexagonShape from '@/components/HexagonShape';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { formatDateKey } from '@/lib/date-utils';
@@ -72,7 +72,7 @@ export default function WeekCalendarStrip({
             className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
             accessibilityLabel="Previous week"
           >
-            <Ionicons name="chevron-back" size={18} color={textHigh} />
+            <Icon name="chevron-back" size={18} color={textHigh} />
           </Pressable>
           <Text className="text-sm text-text-medium font-medium">
             {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -84,7 +84,7 @@ export default function WeekCalendarStrip({
             className="w-8 h-8 items-center justify-center rounded-full active:bg-surface-3"
             accessibilityLabel="Next week"
           >
-            <Ionicons name="chevron-forward" size={18} color={textHigh} />
+            <Icon name="chevron-forward" size={18} color={textHigh} />
           </Pressable>
         </View>
       )}

@@ -1,6 +1,6 @@
 import { View, Text, TextInput, ScrollView, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState, useCallback } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '@/components/Icon';
 import { FormInput } from '@/components/FormInput';
 import { LoadingButton } from '@/components/LoadingButton';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -194,7 +194,7 @@ export default function RecipeForm({
             onPress={addIngredient}
             className="flex-row items-center gap-2 py-2 mt-1"
           >
-            <Ionicons name="add-circle-outline" size={20} color={primary} />
+            <Icon name="add-circle-outline" size={20} color={primary} />
             <Text className="text-sm text-primary">Add ingredient</Text>
           </Pressable>
         </View>
