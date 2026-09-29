@@ -14,18 +14,20 @@
     "preview": {
       "distribution": "internal",
       "ios": {
-        "simulator": false
+        "simulator": false,
+        "image": "macos-sequoia-15.6-xcode-26.2"
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "image": "ubuntu-24.04-jdk-17-ndk-r27b-sdk-55"
       }
     },
     "production": {
       "ios": {
-        "image": "latest"
+        "image": "macos-sequoia-15.6-xcode-26.2"
       },
       "android": {
-        "image": "latest"
+        "image": "ubuntu-24.04-jdk-17-ndk-r27b-sdk-55"
       }
     }
   }

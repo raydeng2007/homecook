@@ -65,6 +65,24 @@ describe('Version source-of-truth (post Bug-fix: appVersionSource=local)', () =>
   it('Version is valid semver', () => {
     expect(expo.version).toMatch(/^\d+\.\d+\.\d+$/);
   });
+
+  it('pins EAS iOS production image to Xcode 26.2 (latest = Xcode 26.6 breaks RN 0.76 fmt 11.0.2)', () => {
+    expect(easJson.build.production.ios.image).toBe('macos-sequoia-15.6-xcode-26.2');
+  });
+
+  it('pins EAS Android production image to the last known-good SDK 52 builder (not `latest`)', () => {
+    expect(easJson.build.production.android.image).toBe('ubuntu-24.04-jdk-17-ndk-r27b-sdk-55');
+  });
+
+  it('preview profile builds on the same images as production, so a green preview proves the production toolchain', () => {
+    expect(easJson.build.preview.android.image).toBe(easJson.build.production.android.image);
+    expect(easJson.build.preview.ios.image).toBe(easJson.build.production.ios.image);
+  });
+
+  it('gitignores /android so EAS always runs prebuild (a committed android/ dir would silently drop config plugins)', () => {
+    const gitignore = fs.readFileSync(path.resolve(__dirname, '../../.gitignore'), 'utf-8');
+    expect(gitignore.split('\n').map((l) => l.trim())).toContain('/android');
+  });
 });
 
 // ─── iOS-specific config (App Store requirements) ─────────────────────
@@ -164,13 +182,13 @@ describe('Android-specific configuration (Play Store requirements)', () => {
     expect(expo.android.permissions).toContain('INTERNET');
   });
 
-  it('targets Android API 35 (Play Store requirement as of Aug 2024)', () => {
+  it('targets Android API 36 (Play Store requirement from Aug 31 2026)', () => {
     const buildProps = expo.plugins.find(
       (p: unknown) => Array.isArray(p) && p[0] === 'expo-build-properties'
     );
     expect(buildProps).toBeDefined();
-    expect(buildProps[1].android.compileSdkVersion).toBeGreaterThanOrEqual(35);
-    expect(buildProps[1].android.targetSdkVersion).toBeGreaterThanOrEqual(35);
+    expect(buildProps[1].android.compileSdkVersion).toBe(36);
+    expect(buildProps[1].android.targetSdkVersion).toBe(36);
   });
 });
 
@@ -202,6 +220,12 @@ describe('Plugin configuration', () => {
       (p: unknown) => Array.isArray(p) && p[0] === 'expo-splash-screen'
     );
     expect(splashPlugin[1].backgroundColor).toBe(expo.splash.backgroundColor);
+  });
+
+  it('includes ./plugins/withAndroid16Compat (Android 16 predictive-back + large-screen resizability opt-outs)', () => {
+    expect(pluginNames).toContain('./plugins/withAndroid16Compat');
+    const pluginPath = path.resolve(__dirname, '../../plugins/withAndroid16Compat.js');
+    expect(fs.existsSync(pluginPath)).toBe(true);
   });
 });
 

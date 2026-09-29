@@ -330,6 +330,8 @@ homecook/
 │   └── recipe-visuals.ts     # Recipe image/color helpers
 ├── types/
 │   └── database.ts           # TypeScript interfaces for DB entities
+├── plugins/
+│   └── withAndroid16Compat.js # Android 16 opt-outs: predictive back + large-screen resizability
 ├── global.css                # Tailwind base + component classes
 └── tailwind.config.js        # Theme configuration
 ```
@@ -340,7 +342,7 @@ homecook/
 nvm use                       # Switch to correct Node version
 npx expo start --clear        # Start dev server (clear cache)
 npx tsc --noEmit              # Type check
-npm test                      # Run Jest unit tests (291 tests)
+npm test                      # Run Jest unit tests (362 tests)
 npx eas build --platform android --profile production  # Android AAB build
 npx eas build --platform ios --profile production      # iOS IPA build
 ```
@@ -394,9 +396,11 @@ npx eas submit --platform android --latest
 ### Regression tests guarding this:
 
 - `__tests__/config/app-config.test.ts` — fails if `versionCode` or `buildNumber` are missing/invalid
-- `__tests__/config/font-loading.test.ts` — fails if Ionicons font loading is removed from `app/_layout.tsx`
+- `__tests__/config/icon-rendering.test.ts` — fails if icons regress to font-based rendering (icons are SVG via `components/Icon.tsx`)
 - `__tests__/assets/icon.test.ts` — fails if icon assets regress (e.g., missing safe zone)
 - `__tests__/platform/*.test.ts` — fails if iOS/Android divergence rules below break
+- `__tests__/config/android16-compat-plugin.test.ts` — fails if the predictive-back opt-out or the resizability property is removed, or if the transform stops being idempotent
+- `__tests__/platform/cross-platform-config.test.ts` — fails if compile/target SDK != 36, the compat plugin is unregistered, or the EAS iOS production image is unpinned
 
 Run `npm test` before every release. If a config test fails, the release is not ready to ship.
 
@@ -423,7 +427,7 @@ The codebase enforces these cross-platform rules through tests in `__tests__/pla
 | External URL handling | Use `WebBrowser.openBrowserAsync`, NEVER `Linking.openURL` for http(s) | Apple rejected a build for session expiration when returning from external Safari |
 | OAuth redirects | Use `makeRedirectUri()` from `expo-auth-session` | It handles platform differences automatically |
 | Status bar | `<StatusBar style={statusBarStyle} />` from `expo-status-bar` | Theme-derived; never hardcoded |
-| Font loading | `useFonts({ ...Ionicons.font })` gated by `if (!fontsLoaded) return null` | Without this, production builds render every icon as a blank circle |
+| Icons | SVG icons via `components/Icon.tsx` (lucide-react-native) — no icon font, no `useFonts` gate | Font-based Ionicons failed to register in production AAB/IPA builds (v1.3.0–1.3.6); never reintroduce a `fontsLoaded` render gate (see Rule 1) |
 | Version source | `app.json` is authoritative (`eas.json` set to `appVersionSource: "local"`) | Previously EAS auto-incremented and shipped 1.2 while local repo said 1.1.1 |
 
 ### Cross-platform forbidden patterns
@@ -435,6 +439,15 @@ These patterns are caught by the platform test suite and will fail CI:
 - `behavior={Platform.OS === 'android' ? 'padding' : 'height'}` (inverted ternary) — must be `'ios' ? 'padding' : 'height'`
 - Apple Sign In button rendered unconditionally — must be gated by `isAppleSignInAvailable()`
 - Removing `usesAppleSignIn: true` or the `expo-apple-authentication` plugin while keeping the Apple button — App Store rejection bait
+
+### Android 16 / EAS image pins (SDK 52)
+
+- compile/target SDK 36 via expo-build-properties only. Never override AGP/Gradle/Kotlin/buildTools on SDK 52. If AGP 8.6 fails with compileSdk 36, the documented fallback is compileSdk 35 + targetSdk 36 (this requires relaxing the exact `compileSdkVersion === 36` assertion in `__tests__/platform/cross-platform-config.test.ts`); after that, upgrade the SDK.
+- `plugins/withAndroid16Compat.js` must stay registered while the app is on RN < 0.81. Without it, Android 16 back exits the app.
+- `eas.json` production iOS image is pinned to `macos-sequoia-15.6-xcode-26.2`. Do NOT set it back to `latest`: Xcode 26.4+ fails compiling fmt 11.0.2 in RN 0.76.
+- `eas.json` Android production AND preview images are pinned to `ubuntu-24.04-jdk-17-ndk-r27b-sdk-55` (the image builds 15–19 succeeded on); preview iOS uses the same pinned Xcode 26.2 image as production, so a green preview build proves the production toolchain. Do NOT set either back to `latest` (it now tracks the newest SDK's image).
+- Never run `expo prebuild` in the repo root: `android/` is not gitignored. Use a scratch copy.
+- Upcoming wall: SDK 52 / RN 0.76 is not 16 KB page-size compliant. Play blocks non-compliant updates from Feb 1 2027, so the Expo SDK 54 upgrade (last Legacy-Arch SDK) must land before then. This is a separate future phase.
 
 ## Code Style
 
@@ -521,9 +534,9 @@ After implementing any feature:
 - [x] Shopping list: auto-generate ingredient list from week's meal plans
 - [x] Household management: invite members, manage roles
 - [x] Recipe search/filter
-- [x] Unit tests (291 tests, 8 suites — validation, date-utils, ingredient-normalize, etc.)
+- [x] Unit tests (362 tests, 22 suites — validation, date-utils, ingredient-normalize, etc.)
 - [x] iOS Privacy Manifest (PrivacyInfo.xcprivacy)
-- [x] Android API 35 targeting
+- [x] Android API 36 targeting (compile/target 36 + Android 16 compat plugin)
 - [x] Legal pages (privacy, terms, delete account) at homecook.live
 - [x] Error handling hardened (silent catches replaced with alerts/warnings)
 - [x] Supabase RLS enabled on all tables
@@ -566,12 +579,12 @@ A meal planning app for households built with Expo and React Native, targeting i
 - SQL - Database migrations in `scripts/migration-*.sql`
 ## Runtime
 - Node.js v22 (specified in `.nvmrc` as `22`, `package.json` engines `>=20.18.1`)
-- React Native 0.76.9 (New Architecture enabled via `"newArchEnabled": true` in `app.json`)
+- React Native 0.76.9 (Legacy Architecture: `"newArchEnabled": false` in `app.json`; SDK 54 is the last SDK supporting this)
 - Expo SDK 52 (managed workflow)
 - npm (version `>=10.0.0` per `package.json` engines)
-- Lockfile: Not present (no `package-lock.json`, `yarn.lock`, or `pnpm-lock.yaml` detected)
+- Lockfile: `package-lock.json` (tracked). `.npmrc` has `save=false`, so `npx expo install` / `npm install` update `package.json` but NOT the lockfile. After adding a dep: `npm shrinkwrap && mv npm-shrinkwrap.json package-lock.json`, confirm `git diff --stat package-lock.json` is non-empty, check that platform-specific optional deps (e.g. `lightningcss-linux-x64-gnu`, needed by EAS Linux builders) were not dropped, and verify `npm ci --ignore-scripts --os=linux --cpu=x64` succeeds in a scratch dir
 ## Frameworks
-- Expo ~52.0.11 - Managed React Native framework (`package.json`)
+- Expo ~52.0.49 - Managed React Native framework (`package.json`)
 - Expo Router ~4.0.14 - File-based routing (`app/` directory, entry point `expo-router/entry`)
 - React 18.3.1 - UI library
 - React Native 0.76.9 - Native platform layer
@@ -619,7 +632,7 @@ A meal planning app for households built with Expo and React Native, targeting i
 - Custom design tokens: Bordeaux & Champagne palette with CSS variable-based theming
 - Global styles: `global.css` (utility classes: `card`, `btn-primary`, `heading-1`, `heading-2`, `screen`)
 - Config: `eas.json`
-- Profiles: `development` (simulator), `preview` (internal distribution), `production` (auto-increment)
+- Profiles: `development` (simulator), `preview` (internal distribution, same pinned images as production), `production` (versions come from `app.json`; no auto-increment)
 - iOS bundle ID: `io.rayray.homecook`
 - Android package: `live.homecook.app`
 - `.env` file present - contains Supabase configuration

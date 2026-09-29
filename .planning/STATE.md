@@ -81,6 +81,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260420-s9l | Fix search results not persisting on recipes tab after navigating to recipe detail and back | 2026-04-21 | 0e77c77 | [260420-s9l-fix-search-results-not-persisting-on-rec](./quick/260420-s9l-fix-search-results-not-persisting-on-rec/) |
+| 260922-v34 | Android API 36 bump (SDK 52 stopgap) + Android 16 compat plugin, EAS image pins, expo-constants / expo 52.0.49, v1.4.0 (20) | 2026-09-24 | uncommitted | [260922-v34-android-api36-bump](./quick/260922-v34-android-api36-bump/) |
 
 ## Session Continuity
 

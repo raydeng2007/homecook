@@ -2,7 +2,7 @@
   "expo": {
     "name": "HomeCook",
     "slug": "homecook",
-    "version": "1.3.9",
+    "version": "1.4.0",
     "newArchEnabled": false,
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "io.rayray.homecook",
-      "buildNumber": "19",
+      "buildNumber": "20",
       "usesAppleSignIn": true,
       "config": {
         "usesNonExemptEncryption": false
@@ -52,7 +52,7 @@
         "backgroundColor": "#121212"
       },
       "package": "live.homecook.app",
-      "versionCode": 19,
+      "versionCode": 20,
       "permissions": [
         "INTERNET"
       ]
@@ -76,11 +76,12 @@
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36
           }
         }
-      ]
+      ],
+      "./plugins/withAndroid16Compat"
     ],
     "scheme": "homecook",
     "extra": {

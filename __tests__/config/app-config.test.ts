@@ -93,5 +93,12 @@ describe('app.json configuration', () => {
     it('adaptive icon background is a hex color', () => {
       expect(config.expo.android.adaptiveIcon.backgroundColor).toMatch(/^#[0-9A-Fa-f]{6}$/);
     });
+
+    // Both stores reject reused build identifiers, and keeping them in
+    // lock-step makes a missed bump obvious.
+    it('versionCode matches iOS buildNumber and is >= 20 (API 36 release)', () => {
+      expect(String(config.expo.android.versionCode)).toBe(config.expo.ios.buildNumber);
+      expect(config.expo.android.versionCode).toBeGreaterThanOrEqual(20);
+    });
   });
 });
