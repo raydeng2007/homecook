@@ -30,5 +30,12 @@
         "image": "ubuntu-24.04-jdk-17-ndk-r27b-sdk-55"
       }
     }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6762423811"
+      }
+    }
   }
 }
